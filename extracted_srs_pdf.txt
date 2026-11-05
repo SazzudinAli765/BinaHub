@@ -1,0 +1,1561 @@
+=== PAGE 1 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 1
+PRODUCT DEFINITION & ENGINEERING BASELINE
+STANDARD
+VIDEO PLAYER
+Software Requirements Specification
+A detailed functional, technical, security and operational specification
+Document control Value
+Document version 1.0 - Consolidated requirements baseline
+Document date 3 November 2026
+Product target Android-first, cross-platform media player
+Application stack Flutter/Dart UI with native C/C++ media and processing components
+Distribution assumption Direct APK distribution initially; manual user-approved installation of updates
+Status Requirements baseline for architecture, UX design and implementation planning
+Source 235 user decisions captured during requirements discovery, plus earlier confirmed product constraints
+Prepared as an implementation-oriented baseline. This document does not claim that every proposed integration or hardware feature 
+is already implemented; it defines the required behavior, constraints, verification approach and items that must be validated during 
+engineering.
+=== PAGE 2 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 2
+Document control
+Field Description
+Purpose
+Define the functional and non-functional requirements for 
+the Standard Video Player and its associated cloud, vault, 
+development and administration systems.
+Audience
+Product owner, UX designer, Flutter engineers, native 
+Android/C++ engineers, backend engineers, QA, security 
+reviewers and release managers.
+Baseline authority
+Where this document conflicts with older drafts or 
+prototypes, this consolidated baseline takes precedence 
+unless the product owner explicitly approves a change.
+Change management
+Changes to security, expiry, backup, admin ownership or 
+data-loss behavior require documented impact analysis 
+and approval.
+Confidentiality
+Contains privileged system design. Secrets, access codes, 
+API credentials, private keys and actual account recovery 
+values are intentionally excluded.
+Contents
+Contents Contents
+Executive summary 12. Administrator console and security governance
+1. Purpose, scope and product vision 13. Data model and information classification
+2. Product goals and design principles 14. External interfaces and integration requirements
+3. Stakeholders, users and roles 15. Non-functional requirements
+4. Product scope, assumptions and constraints 16. Key workflows and state transitions
+5. System architecture and technology strategy 17. Acceptance criteria
+6. Information architecture and navigation 18. Verification and test strategy
+7. Functional requirements 19. Delivery phases and release gates
+8. Development Mode, Pro Mode and experimental capabilities 20. Risks, dependencies and mitigations
+9. Google Drive media integration and offline downloads 21. Open implementation decisions
+10. Secret Vault and privacy controls Appendix A. Consolidated decision traceability
+11. Backup, restore and cloud-storage management Appendix B. Glossary and abbreviations
+=== PAGE 3 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 3
+Executive summary
+The Standard Video Player is an Android-first, cross-platform media application designed around a 
+responsive, immersive video player, a dedicated audio experience, a searchable local library, Google Drive 
+media access, utility tools, an encrypted Secret Vault and a layered administration/security environment. The 
+application is intended to provide a strong everyday playback experience without exposing advanced controls 
+to users who do not need them.
+The product will use Flutter and Dart for the application and user interface, with native Kotlin/Android 
+integration and C/C++ components for performance-sensitive playback, codec, rendering and media-
+processing work. The implementation should build on proven media engines and codec libraries rather than 
+attempting to create an entire decoding stack from scratch. Exact engine/library selections remain subject to 
+compatibility, licensing, maintenance and device-benchmark evaluation.
+The primary navigation contains Video, Audio, Tools and Settings. The default landing page is the Video 
+Library. The app supports local device media and Google Drive as media sources. Broader cloud-provider 
+support is intended for encrypted backup storage, not as a general replacement for the explicitly limited 
+media-source model. YouTube, YouTube Music, SMB/NAS, DLNA and arbitrary network shares are outside 
+scope.
+Standard mode presents essential playback and library functions. Pro Mode is freely available and exposes 
+advanced user-facing controls such as expanded equalizer and color controls, audio/video profiles and 
+advanced enhancement settings. Development Mode is separately gated, time-limited and device-bound; it 
+provides experimental processing and hardware override tools and is activated online through a server-
+authoritative approval process.
+The security model includes a transactional encrypted Secret Vault; encrypted local and cloud backups; 
+device-bound administrator sessions; multi-factor administrator login; tamper-evident audit logs; role-based 
+access; controlled recovery; and emergency lockdown. Backup data is compressed before encryption, each 
+backup receives an independent encryption key, and cloud replicas are verified before the primary copy is 
+removed.
+Important engineering boundary
+The requirements specify intended behavior, not impossible guarantees. Android cannot guarantee a permanent 
+hardware identity, force a disconnected device to receive a remote command, physically erase every flash-storage 
+remnant, or guarantee that an unsupported cloud provider exposes all required APIs. The implementation must use 
+cryptographic device binding, signed metadata, local expiry enforcement, secure key management and provider 
+capability checks, while clearly reporting residual limitations.
+1. Purpose, scope and product vision
+1.1 Purpose
+This SRS establishes a shared implementation baseline for the Standard Video Player. It defines what the 
+product must do, how its major subsystems interact, which security and operational controls are required, 
+and how completion can be verified. It is intended to reduce ambiguity between product, design, engineering 
+and QA.
+=== PAGE 4 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 4
+1.2 Product vision
+Deliver a polished, responsive and immersive media player that handles local and Google Drive media, 
+supports advanced playback and enhancement on capable devices, includes a first-class audio experience, 
+and provides dependable privacy, backup and recovery features. Everyday playback should remain 
+straightforward; advanced and experimental capability should be isolated behind Pro and Development Mode 
+surfaces.
+1.3 In-scope capabilities
+ Video playback with HW, HW+, SW and hybrid decoder strategies; responsive immersive controls; 
+gestures; resume; bookmarks; playback profiles; HDR handling; frame stepping; A-B repeat; PiP and 
+floating playback.
+ Dedicated audio library and player with background playback, queues, playlist import/export, output 
+profiles, equalizer, lyrics, sleep timer and video-as-audio operation.
+ Local library scanning and indexing with folder exclusions, hidden-file preference, duplicate detection, 
+search, filters, sorting and user-customizable layouts.
+ Google Drive browsing and streaming, optional original-quality offline download, upload/save-back, 
+network controls and time-limited offline-copy governance.
+ Utility tools for conversion, audio extraction, frame extraction, subtitle processing, media inspection and 
+batch jobs.
+ Pro Mode, Development Mode, graphics capability detection, multi-stage upscaling, deblur, denoise and 
+experimental processing.
+ Encrypted Secret Vault with transactional file movement, auto-lock, privacy protections and account-
+based recovery.
+ Local and cloud app backups, restore points, storage offloading, provider integration, administrative 
+exports and recovery.
+ Role-based administrator console, protected ownership, 2FA, device management, session controls, audit 
+trails, security monitoring and global lockdown.
+1.4 Explicitly out of scope
+ YouTube or YouTube Music streaming, downloading, extraction, background playback or account 
+integration.
+ SMB, NAS, DLNA or arbitrary network-share playback as media sources.
+ Building a complete proprietary codec/decoder engine from first principles.
+ Guaranteed recovery of data after loss of all device keys and all valid backups.
+ Guaranteed physical secure erase of flash storage or guaranteed remote enforcement while a device 
+remains disconnected.
+ Automatic silent installation of APK updates; users must approve and install updates manually.
+2. Product goals and design principles
+ID Goal / principle Product interpretation
+G-01 Fast path to playback
+Open to Video Library; make scanning, 
+search, resume and play controls 
+obvious.
+=== PAGE 5 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 5
+ID Goal / principle Product interpretation
+G-02 Progressive disclosure
+Keep standard controls clear; put 
+advanced adjustments in Pro; reserve 
+experimental and potentially unstable 
+controls for Development Mode.
+G-03 Responsive by design
+Adapt layouts to device size, orientation, 
+display cut-outs, multi-window and 
+external displays. Avoid fixed-size 
+layouts.
+G-04 Quality-aware processing
+Use source-aware, device-aware 
+processing stages. Do not equate a larger 
+output resolution with genuine 
+recovered source detail.
+G-05 Privacy by default
+Do not transmit diagnostics, analytics or 
+crash reports without the chosen 
+consent.
+G-06 Data-loss prevention
+Preserve source media by default; use 
+staged file transactions; protect backups 
+with restore points and verified 
+replication.
+G-07 Offline-first playback
+Local playback and library features 
+must remain useful without a network. 
+Server-dependent activation, cloud 
+browsing and online sync remain 
+network-dependent.
+G-08 Honest capability reporting
+Report hardware/API/library capabilities 
+accurately; do not advertise unavailable 
+Vulkan, NPU or HDR paths.
+G-09 Secure-by-design administration
+Admin identity, device binding, 
+authentication, permissions, audit and 
+recovery must be enforced server-side.
+G-10 Maintainable extensibility
+Use modular interfaces and provider 
+adapters so engines, scalers and cloud 
+providers can be changed without 
+rewriting the application.
+3. Stakeholders, users and roles
+3.1 User groups
+User group Primary needs Key capabilities
+Standard user Reliable playback, searchable library, simple controls Video/audio playback, basic subtitles, standard tools, preferences, local and Drive media.
+Pro user More control without experimental risk
+Advanced EQ, color profiles, 
+enhancement tuning, advanced subtitle 
+and player controls.
+=== PAGE 6 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 6
+User group Primary needs Key capabilities
+Development Mode user Validate experimental capabilities on approved devices Experimental scalers, shaders, decoder experiments, hardware overrides, diagnostics and test configurations.
+Main Admin / protected owner Ownership and highest-level governance
+Master recovery configuration, 
+administrator management, storage-
+provider connection, critical security 
+and ownership settings.
+Super Admin Operate the administrative system
+Full administrative authority within the 
+protected-owner governance and mutual 
+ownership-transfer rules.
+Admin Operational administration
+User requests, offline-download 
+extensions, user management and 
+delegated backup permissions.
+Support Admin Limited support access
+View permitted support information and 
+assist with user requests without broad 
+sensitive-data access.
+3.2 Role model
+ROLE-01  [Must] The administrator system shall implement Super Admin, Admin and Support Admin roles with 
+distinct permission sets.
+ROLE-02  [Must] There shall be no public administrator registration. Admin identities must be pre-approved 
+Google accounts with mandatory 2FA.
+ROLE-03  [Must] The system shall support a maximum of three Super Admin accounts. The protected owner/Main 
+Admin is one of these accounts.
+ROLE-04  [Must] The protected-owner designation may transfer to either authorized Super Admin only after 
+mutual approval by the relevant existing Super Admins. The previous protected owner remains a Super Admin 
+unless separately and explicitly changed.
+ROLE-05  [Must] The Main Admin alone may connect additional backup-storage providers/accounts and change 
+the recovery code. Either Super Admin may independently trigger or deactivate global lockdown under the 
+required reauthentication controls.
+ROLE-06  [Must] Either Super Admin may grant delegated backup-restoration permission. Backup export and 
+backup restoration shall remain separate permission capabilities.
+ROLE-07  [Must] Support personnel shall not receive secrets, recovery codes, raw biometrics, private keys or 
+unrestricted access to private media.
+ROLE-08  [Must] The protected owner shall not be removed or disabled by another Super Admin while protected. 
+Any transfer of the protected-owner designation shall follow the mutual-approval workflow; the former owner 
+remains a Super Admin unless separately changed.
+4. Product scope, assumptions and constraints
+4.1 Platform strategy
+ Android is the first implementation target. The product architecture should remain cross-platform where 
+the selected media, storage and security abstractions permit.
+=== PAGE 7 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 7
+ Flutter/Dart provides the primary UI and application state management. Kotlin provides Android lifecycle, 
+permissions, storage access, notifications, media session, foreground service and platform API integration.
+ C/C++ is used for media engine integration, decoder/rendering paths and performance-sensitive 
+processing. A narrow FFI/NDK boundary should keep UI code independent of native implementation 
+details.
+ The initial distribution model is direct APK delivery. The app should check for updates and notify the user, 
+but the user manually downloads and approves installation.
+4.2 Device and OS constraints
+ Android scoped storage and runtime permissions constrain which files can be indexed. The application 
+must request only permissions justified by a feature and use the system file/folder picker where practical.
+ Hardware decoder, Vulkan, NPU, HDR output, audio passthrough, external displays and refresh-rate 
+matching are device- and OS-dependent. Capability detection must precede feature exposure.
+ Android Keystore may provide hardware-backed key protection on supported devices; the app must 
+detect and report the actual security level rather than assuming hardware backing.
+ An Android device identifier is not a universal permanent hardware identity. Device binding must use 
+registered cryptographic keys and risk signals in addition to platform identifiers.
+4.3 Network and integration constraints
+ Local playback must function offline. Development Mode activation, Google Drive browsing, online 
+subtitle services, updates, cloud backups and cross-device sync require network connectivity.
+ Google Sign-In identity, Google Drive media access and backup cloud-provider connections are separate 
+authorization contexts. A Google account login does not automatically authorize Drive file access.
+ Cloud backup providers must be integrated using supported official APIs or a vetted connector. Where an 
+API cannot support required upload, download, listing, deletion or verification operations, that provider 
+must be marked unsupported or partially supported rather than accessed through brittle scraping.
+ Proton Drive multi-account support is a desired provider capability and must be validated against 
+available official integration options before implementation commitments are made.
+4.4 Licensing and distribution constraints
+Before selecting mpv, FFmpeg, Media3/ExoPlayer, codec packs, AI models or graphics libraries, engineering 
+must complete license, attribution, redistribution and patent-risk reviews appropriate to the intended 
+distribution model. GPL/LGPL obligations, codec patents and third-party model terms must be assessed by 
+qualified reviewers. This SRS does not grant any third-party license.
+5. System architecture and technology strategy
+5.1 Logical architecture
+Layer Primary technology direction Responsibilities
+Presentation Flutter / Dart
+Responsive screens, navigation, state, 
+settings, library views, dialogs and user-
+facing Pro/Dev surfaces.
+=== PAGE 8 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 8
+Layer Primary technology direction Responsibilities
+Platform integration Kotlin / Android APIs
+Storage and folder access, permissions, 
+background services, media session, PiP, 
+notifications, biometric prompt, device 
+state, external display and APK update 
+handoff.
+Media core C/C++ with selected established engine(s)
+Demuxing, decoding, audio/video output, 
+track handling, timestamps, frame 
+stepping, rendering, error recovery and 
+engine abstraction.
+Processing pipeline C/C++ and vetted compute libraries
+Deblur, denoise, deblocking, scaling, 
+sharpening, color transforms, frame 
+processing and hardware capability 
+routing.
+Local persistence SQLite plus app-private files
+Library index, preferences, playback 
+history, bookmarks, queue, download 
+metadata, vault metadata and job state.
+Backend services Secure API services
+Admin identity, Dev Mode activation, 
+device registration, expiry/approval 
+state, recovery, audit records, 
+notifications and cloud job metadata.
+Cloud adapters Provider-specific API adapters
+Google Drive media access; backup 
+providers including supported Google 
+Drive, OneDrive, Dropbox and Proton 
+Drive accounts.
+5.2 Native boundary and engine strategy
+ARCH-01  [Must] The UI layer shall communicate with the native media core through a versioned, typed interface 
+(FFI/platform channel/native plugin) rather than direct scattered native calls.
+ARCH-02  [Must] The media core shall expose a stable abstraction for source, decoder, renderer, audio output, 
+tracks, seek, playback state and error events.
+ARCH-03  [Must] The implementation shall evaluate established media engines and codec libraries. It shall not 
+reimplement all codec decoding functionality from scratch.
+ARCH-04  [Must] Decoder selection shall support HW, HW+, SW and hybrid strategies where supported by the 
+chosen engine/device. The selection policy shall be observable in diagnostics.
+ARCH-05  [Must] Native processing modules shall be isolated so that deblur, denoise, scaling, sharpening and color 
+processing can be enabled, disabled, benchmarked and replaced independently.
+ARCH-06  [Must] GPU/NPU/CPU paths shall be capability-probed and validated. Unsupported paths must fall back 
+safely without blocking ordinary playback.
+5.3 Backend authority
+The backend is authoritative for administrator roles, Dev Mode activation/expiry/revocation, protected-owner 
+state, offline-download extension approvals, admin recovery records, audit events and cloud backup 
+metadata. A mobile client must not be able to grant itself Dev Mode, extend an expiry, alter administrator 
+roles or erase audit history by editing local data.
+=== PAGE 9 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 9
+5.4 Modularity
+ Media engine adapter
+ Decoder policy and fallback controller
+ Video processing graph
+ Audio processing graph
+ Local library scanner/indexer
+ Google Drive media adapter
+ Backup provider adapters
+ Vault encryption and transaction manager
+ Admin/security client
+ Download and conversion job manager
+6. Information architecture and navigation
+6.1 Primary navigation
+Area Purpose Key content
+Video Default landing destination
+Video library, search/filter/sort, layouts, 
+favorites, history/resume and video 
+playback.
+Audio Dedicated audio destination
+Audio library, playlists, albums/artwork, 
+queue, lyrics, audio playback and output 
+settings.
+Tools Utility workspace
+Converters, extraction, subtitle utilities, 
+frame capture, media details and batch 
+jobs.
+Settings Preferences and management
+Appearance, language, scanning, 
+downloads, playback defaults, privacy, 
+notifications, backup and connected 
+accounts.
+A persistent coin icon on major pages opens the Earn area. The current Earn destination is a Coming Soon 
+placeholder; no earning, rewards or payment workflow is included in this release baseline.
+6.2 Library layouts
+UX-01  [Must] The Video and Audio libraries shall be separate, with independent layout, sort, filter and view 
+preferences.
+UX-02  [Must] The library shall support user-customizable layouts, including grid, list and compact grid as baseline 
+arrangements.
+UX-03  [Must] The library shall support global search and section-specific search.
+UX-04  [Must] The library shall provide resolution filters for all detected resolutions, including 720p, 1080p, 2K, 4K, 
+8K and other detected values.
+UX-05  [Must] Sort/group options shall include name, date, size, duration, resolution, folders, format and recently 
+played.
+UX-06  [Must] User preferences shall persist across restarts and remain independently configurable for Video and 
+Audio.
+=== PAGE 10 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 10
+UX-07  [Must] Customizable library layouts shall allow the user to adjust layout mode and supported presentation 
+properties such as thumbnail density/size, columns, visible metadata and spacing, subject to responsive layout 
+constraints.
+6.3 Visual and responsive design
+ All screens shall adapt to available width/height, density, orientation, window size and display cut-outs.
+ No core page shall rely on a fixed absolute-size canvas that clips on smaller or larger devices.
+ The app shall support Light, Dark and System themes. Additional downloadable or bundled skins may be 
+introduced in later versions and must be clearly labeled Coming Soon until implemented.
+ The default opening destination is Video Library.
+ Language shall follow device language by default, with manual language selection.
+ App-specific accessibility controls shall complement Android accessibility settings.
+7. Functional requirements
+7.1 Startup, permissions and settings
+APP-01  [Must] On first launch, onboarding shall explain the permissions needed for the initial library/player 
+experience and request those necessary permissions. Feature-specific permissions that cannot or should not be 
+requested at startup shall be requested when the related feature is first used, following Android policy.
+APP-02  [Must] The app shall provide a settings switch for background audio playback.
+APP-03  [Must] The app shall provide individual notification preferences and a master notification switch.
+APP-04  [Must] The app shall ask for consent during first installation/onboarding before collecting analytics or 
+usage data. If consent is denied, collection must remain disabled. Consent must be changeable later in Settings.
+APP-05  [Must] Crash reports and diagnostic reports shall require explicit per-report consent unless the user 
+separately enables a future-consent preference. A crash dialog shall clearly state that the app crashed and offer an 
+optional report submission.
+APP-06  [Must] App data clearing shall offer a backup opportunity and then allow the user to proceed only after 
+explicit confirmation.
+APP-07  [Must] App launch lock shall be optional and support PIN and device biometric authentication.
+APP-08  [Must] The app shall ask for explicit confirmation before deleting any media file. Duplicate cleanup and 
+repair utilities shall not delete original files without confirmation.
+7.2 Local media sources and scanning
+LIB-01  [Must] The app shall scan all accessible media locations by default, subject to Android permission and 
+scoped-storage rules.
+LIB-02  [Must] Users shall be able to filter included folders and exclude folders and file types.
+LIB-03  [Must] Hidden files and folders shall be excluded by default, with an opt-in setting to include them.
+LIB-04  [Must] The scanner shall detect newly added media automatically where OS facilities permit and shall also 
+run scheduled full rescans.
+LIB-05  [Must] The scanner shall identify likely duplicate files and offer to hide duplicate library entries or remove 
+an entry. It shall not silently delete the underlying media file.
+LIB-06  [Must] The library shall store media references and technical metadata in a local database; it shall not 
+unnecessarily copy source media into the app data directory.
+LIB-07  [Must] The scanner shall tolerate inaccessible, transient, unsupported or corrupted files and continue 
+scanning other items.
+=== PAGE 11 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 11
+LIB-08  [Must] Users shall be able to rescan folders and see scan progress and recoverable errors.
+7.3 Video playback
+VID-01  [Must] The player shall provide an immersive full-screen mode that uses the available display area and 
+adapts responsively to device dimensions.
+VID-02  [Must] The video title shall remain hidden during immersive playback unless the user explicitly opens 
+information or playback controls.
+VID-03  [Must] A single tap shall reveal standard controls; controls shall auto-hide after a configurable short delay.
+VID-04  [Must] Standard controls shall include Play/Pause, Previous Video and Next Video. Previous/Next shall 
+switch media items and shall not act as 10-second seek controls.
+VID-05  [Must] Double-tap on the left or right playback area shall seek backward or forward by 10 seconds 
+respectively.
+VID-06  [Must] The player shall support HW, HW+, SW and hybrid decoder modes where supported, with 
+automatic selection and fallback after a decoder failure.
+VID-07  [Must] On a hardware-decoder failure, the player shall automatically attempt a compatible alternative 
+decoder path, including software or hybrid mode where appropriate.
+VID-08  [Must] For damaged frames, the player shall attempt recovery; if recovery fails, it shall skip the damaged 
+frame and continue where safe.
+VID-09  [Must] On a playback failure, the player shall retry through another compatible playback method before 
+surfacing an unrecoverable error.
+VID-10  [Must] On unexpected crash, the app shall clearly disclose the crash and offer optional report submission. 
+The report must not be sent without consent.
+VID-11  [Must] The player shall support the widest stable playback-speed range exposed by the engine and device. 
+The UI shall validate the actual supported range rather than promising a fixed maximum.
+VID-12  [Must] The player shall support dedicated previous-frame and next-frame controls where frame stepping 
+is supported by the active engine.
+VID-13  [Must] The player shall support A-B loop markers and repeat playback between the selected timestamps.
+VID-14  [Must] The user shall be able to choose resume behavior in Settings. The app shall not repeatedly ask on 
+every playback start.
+VID-15  [Must] Playback history shall be retained indefinitely until the user clears it. Resume positions shall be 
+saved with sufficient precision for practical restoration.
+VID-16  [Must] The player shall support global or per-video brightness and volume preferences, configured in 
+Settings rather than prompted every time.
+VID-17  [Must] The player shall follow device orientation by default and provide a temporary rotation control.
+VID-18  [Must] The player shall support Android Picture-in-Picture and a separate floating player window where 
+permitted by OS/device policy.
+VID-19  [Must] The player shall match display refresh rate to video frame rate where supported, with safe fallback 
+if the OS denies or does not support the request.
+VID-20  [Must] The player shall use best supported HDR output when the display path supports HDR; otherwise it 
+shall tone-map HDR content to SDR.
+VID-21  [Must] The player shall expose expandable panels for subtitles, audio tracks, speed, aspect ratio, rendering 
+and enhancement options. Advanced controls shall not overwhelm the default screen.
+VID-22  [Must] The player shall support Eco, Balanced and Performance playback modes. Automatic 
+thermal/battery adaptation shall be available with a manual override option.
+=== PAGE 12 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 12
+VID-23  [Must] Playback profiles shall be selected automatically based on hardware and video characteristics, 
+while allowing users to create and select custom profiles.
+VID-24  [Must] The player shall support compatible external displays and external audio output.
+VID-25  [Must] The Video Library shall provide a prominent Resume entry for the last interrupted item when a 
+valid resume position exists, using the configured resume behavior and exact saved timestamp.
+7.4 Gestures and controls
+CTL-01  [Must] The default gesture map shall assign left-side vertical gestures to brightness, right-side vertical 
+gestures to volume and horizontal gestures to seeking.
+CTL-02  [Must] Standard controls shall remain usable with touch, accessibility services and supported 
+remote/headset controls.
+CTL-03  [Must] Advanced customization of player buttons, gesture mappings, button sizes, visibility and auto-hide 
+timing shall be available in Pro Mode.
+CTL-04  [Must] The center Previous/Next controls shall preserve their media-navigation semantics even when 
+users customize layout.
+7.5 Audio player
+AUD-01  [Must] The app shall provide a first-class Audio library separate from Video.
+AUD-02  [Must] Audio playback shall support background playback and screen-off playback. Users shall control 
+this behavior in Settings.
+AUD-03  [Must] The audio player shall expose configurable headset/Bluetooth media controls, including 
+play/pause, next and previous where the device supports them.
+AUD-04  [Must] The audio player shall support automatic folder progression and a user-managed playback queue.
+AUD-05  [Must] The application shall support playlists and M3U/PLS import/export, plus app-level backup and 
+restoration of playlist structures.
+AUD-06  [Must] The app shall support shuffle, repeat, album artwork and queue management.
+AUD-07  [Must] Standard mode shall expose normal equalizer controls. Pro Mode shall expose advanced equalizer 
+controls and richer profile customization.
+AUD-08  [Must] Standard users shall be able to select available audio presets. Pro users shall be able to tune and 
+save custom audio profiles.
+AUD-09  [Must] The app shall provide clipping protection and a limiter for boosted playback. Volume boost shall 
+support the requested up-to-100-percent boost range where the output path safely permits it, with explicit warning 
+that digital gain cannot guarantee a louder physical output on every device.
+AUD-10  [Must] The app shall support local and online lyrics, with synchronized lyrics where the provider and 
+track metadata permit.
+AUD-11  [Must] The app shall provide a sleep timer based on elapsed time and/or end of current track.
+AUD-12  [Must] The app shall detect phone speakers, wired headphones and Bluetooth output where Android 
+exposes the route, then apply suitable automatic profiles. Users may override the automatic profile.
+AUD-13  [Must] Audio passthrough shall be enabled automatically only when the device, output route, codec and 
+application path support it; otherwise audio shall use a compatible decoded output path.
+AUD-14  [Must] The app shall support Video-as-Audio playback by playing the audio track without rendering the 
+video.
+AUD-15  [Must] Bit-perfect or lossless output shall only be claimed when the end-to-end output path actually 
+preserves the source. Bluetooth and device audio processing may prevent bit-perfect delivery.
+=== PAGE 13 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 13
+7.6 Subtitle functionality
+SUB-01  [Must] The player shall support commonly used subtitle formats through validated libraries/codecs, 
+including SRT, ASS, SSA, SUB, VTT and image-based formats where supported.
+SUB-02  [Must] The player shall automatically locate matching local subtitle files where practical and allow 
+manual subtitle selection.
+SUB-03  [Must] The app shall support online subtitle search/download through supported providers and shall keep 
+online access user-initiated or clearly configurable.
+SUB-04  [Must] Subtitle preferences shall default to device language, with the ability to change preferred 
+languages and priority in Settings.
+SUB-05  [Must] When multiple subtitle tracks are available, the player shall present a selection interface rather 
+than silently selecting an arbitrary track.
+SUB-06  [Must] Subtitle synchronization shall include manual timing offset and automatic synchronization 
+assistance where feasible.
+SUB-07  [Must] Standard subtitle appearance controls shall include font, size, color, outline, background and 
+position; Pro Mode may provide advanced styling options.
+SUB-08  [Must] Subtitle tools shall support synchronization, conversion, merge, split and editing operations where 
+the format permits.
+7.7 Search, favorites and history
+SRCH-01  [Must] The app shall provide global search across media, folders, playlists and supported tool items, as 
+well as separate Video and Audio search.
+SRCH-02  [Must] Video and Audio favorites shall be separate collections.
+SRCH-03  [Must] Playback history shall be persistent until manually cleared and shall include resume references 
+and relevant metadata.
+SRCH-04  [Must] Bookmarks shall save playback timestamps. Bookmark export/import is not required in the 
+current baseline unless added to a later version.
+7.8 Tools and media conversion
+TOOL-01  [Must] The Tools section shall provide video format conversion and device-ready conversion presets.
+TOOL-02  [Must] Before conversion, the user shall select or confirm the target quality/resolution, such as 360p 
+source to 1080p output. The app shall not silently claim that upscaling restores native source detail.
+TOOL-03  [Must] Upscaling conversion shall use a staged processing graph where appropriate. Candidate stages 
+include decode/normalization, artifact reduction, deblur, scaling, sharpening/color correction and final encoding. 
+Each stage shall be independently testable and tunable.
+TOOL-04  [Must] The default conversion quality policy shall choose appropriate bitrate, codec and other 
+parameters for the selected target, while explaining output expectations. Advanced manual encoder controls may 
+be added in Pro/Dev as appropriate.
+TOOL-05  [Must] The user shall choose whether to preserve the original, create a separate output or replace the 
+original after explicit confirmation. The preference may be remembered and changed in Settings.
+TOOL-06  [Must] The conversion manager shall support multiple queued jobs and parallel conversion only when 
+device capability, thermal state and memory allow it.
+TOOL-07  [Must] Conversion queue controls shall include pause, resume, cancel, reorder and retry, with per-file 
+progress and error reporting.
+=== PAGE 14 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 14
+TOOL-08  [Must] Audio extraction shall preserve the original audio stream without re-encoding where technically 
+possible; otherwise it shall offer supported formats such as MP3, AAC, WAV, FLAC and other library-supported 
+formats.
+TOOL-09  [Must] Frame tools shall support single-frame capture, multi-frame extraction and 
+contact-sheet/thumbnail-sheet generation.
+TOOL-10  [Must] Media information shall show a basic view in Standard mode. Pro Mode may expose detailed 
+technical diagnostics such as codec, bitrate, resolution, frame rate, tracks, HDR metadata and decoder path.
+TOOL-11  [Must] Batch operations shall be supported across compatible selected media files.
+TOOL-12  [Must] Repair tools shall diagnose damaged media and, where a safe repair is possible, write a separate 
+repaired output. The source shall remain untouched unless the user explicitly chooses otherwise.
+TOOL-13  [Must] The tool workspace shall support job cancellation and safe cleanup of partial outputs.
+8. Development Mode, Pro Mode and experimental capabilities
+8.1 Standard mode
+Standard mode is the everyday experience. It includes essential playback, ordinary equalizer controls, 
+standard selectable audio presets, core subtitle controls, library features and safe automatic enhancement 
+when the device supports it. It should not expose experimental hardware overrides or low-level scaler tuning.
+8.2 Pro Mode
+PRO-01  [Must] Pro Mode shall be freely unlocked and shall not require a code, passphrase or separate purchase 
+gate in the current product baseline.
+PRO-02  [Must] Pro Mode shall expose advanced color controls, at least ten color profiles, including an AMOLED-
+oriented black profile, and user adjustment where supported.
+PRO-03  [Must] Pro Mode shall expose at least ten audio profiles/presets, such as Jazz, Pop and other common 
+listening profiles, plus custom tuning.
+PRO-04  [Must] Pro Mode shall expose advanced equalizer controls, aspect-ratio controls, playback speed controls, 
+expanded subtitle styling and advanced playback-control customization.
+PRO-05  [Must] Pro Mode shall expose advanced enhancement intensity settings, separate deblur and upscaling 
+controls, and clear before/after preview tools.
+PRO-06  [Must] On entry, Pro Mode shall display detected graphics capabilities (for example Vulkan support or 
+unavailable status) and related hardware capabilities before presenting advanced controls.
+PRO-07  [Must] Pro Mode shall expose the requested volume boost up to 100% where safe, with a limiter and 
+clipping protection. The app must not promise that this doubles the real acoustic output on every device.
+PRO-08  [Must] Pro Mode shall keep advanced settings organized in expandable sections rather than placing all 
+controls on the primary playback screen.
+8.3 Automatic enhancement and upscaling
+ENH-01  [Must] When supported hardware can handle it, automatic upscaling shall be enabled according to a 
+hardware/source-aware recommendation.
+ENH-02  [Must] The automatic enhancement pipeline shall choose stages based on source quality, motion/content 
+characteristics, device capability and thermal/battery state.
+ENH-03  [Must] Deblur shall be a separately implemented processing subsystem with its own strength, thresholds, 
+artifact checks, enable/disable state and test coverage.
+=== PAGE 15 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 15
+ENH-04  [Must] Noise and compression-artifact reduction shall be a separate subsystem with configurable 
+strength and safeguards against loss of legitimate texture.
+ENH-05  [Must] Upscaling shall be a separate subsystem with selectable scaler/model paths and output validation.
+ENH-06  [Must] Sharpening and color correction shall be optional stages and shall not be forced when they 
+introduce ringing, halos or color shifts.
+ENH-07  [Must] Pro Mode shall expose safe user controls; Development Mode shall expose experimental stage 
+overrides and low-level hardware choices.
+ENH-08  [Must] Before/after preview shall support both side-by-side comparison and an adjustable comparison 
+slider.
+ENH-09  [Must] The system shall adapt processing intensity when battery or thermal conditions require it. Users 
+may override adaptation where safe, but the app must retain protective limits against device instability.
+ENH-10  [Must] The system shall report when a target output such as 1080p is achieved by upscaling a lower-
+resolution source. It shall not represent the result as equivalent to native 1080p detail.
+8.4 Development Mode access and lifecycle
+DEV-01  [Must] Development Mode activation shall require a specific authorization code and a live online 
+validation against the authoritative backend.
+DEV-02  [Must] Development Mode access shall be time-limited, device-bound and revocable. The backend shall 
+record activation, start time, expiry, usage events, opening/closing, failed attempts and revocation.
+DEV-03  [Must] Development Mode shall automatically grant Experimental Access; no separate experimental-
+access code is required.
+DEV-04  [Must] Development Mode shall include custom shaders, scalers, experimental processing, 
+hardware/decoder experiments, diagnostics and experimental configuration tools.
+DEV-05  [Must] Manual overrides to hardware selection, scaler selection and experimental processing shall 
+require Development Mode. Automatic hardware-recommended upscaling remains available outside Development 
+Mode.
+DEV-06  [Must] When Development Mode expires or is revoked, experimental overrides shall be reset and 
+recommended hardware settings restored. Standard and Pro features shall remain available.
+DEV-07  [Must] The service shall support up to three linked devices per user account. Each additional eligible 
+device shall receive an independent Development Mode approval and activation period.
+DEV-08  [Must] The second and third device activation requests shall be submitted to the designated project 
+contact for manual review, with an expected 24-48 hour review window as an operational target, not a guaranteed 
+SLA.
+DEV-09  [Must] A fourth linked device request shall show existing linked devices and require the user to choose 
+one to replace, confirm the replacement, reauthenticate and revoke the replaced device. The event shall be audited 
+and the owner notified.
+DEV-10  [Must] Development Mode activation shall not be transferred by application backup or restored settings. 
+A backup must never unlock Development Mode.
+DEV-11  [Must] One day before Development Mode expiry, the app shall prompt the user to export compatible 
+player settings. On import, non-development settings may be restored when Dev Mode is inactive; development-
+only settings shall be ignored unless the target device has valid Dev Mode authorization.
+=== PAGE 16 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 16
+9. Google Drive media integration and offline downloads
+9.1 Source boundaries and sign-in
+DRV-01  [Must] The app shall support local device storage and Google Drive as the only approved media-source 
+categories in the current baseline.
+DRV-02  [Must] Google Sign-In for app identity/device linking shall be separate from Google Drive authorization 
+and scopes.
+DRV-03  [Must] The app shall allow the user to connect a Google Drive account, browse folders, identify supported 
+media and stream compatible media without requiring a full local download first.
+DRV-04  [Must] The app shall allow optional download of an original-quality Drive file and upload/save-back of 
+supported video files to Drive.
+DRV-05  [Must] The app shall not integrate YouTube or YouTube Music. YouTube extraction, downloading, 
+streaming and background playback are explicitly excluded.
+9.2 Download manager
+DLD-01  [Must] The download manager shall support multiple queued downloads, pause, resume, retry, progress, 
+priority/reordering, cancellation and removal from queue.
+DLD-02  [Must] The user shall choose, per download, between private app storage hidden from ordinary 
+gallery/file-manager views and a user-selected folder accessible through the file manager, subject to Android 
+storage permissions.
+DLD-03  [Must] Offline downloads shall preserve the original file bytes/quality. The system shall not compress, 
+transcode or reduce quality as part of offline download.
+DLD-04  [Must] Concurrent download count shall adapt to network, device capability, memory, battery and 
+thermal state, with a manual override subject to safe limits.
+DLD-05  [Must] Network controls shall include Wi-Fi-only, mobile-data allowance, ask-before-mobile-data, 
+roaming restriction and data-use warnings/limits.
+DLD-06  [Must] Automatic download rules shall be optional and disabled by default. The user may define selected 
+folders, media types, new-file rules, network constraints and storage thresholds.
+DLD-07  [Must] Automatic-download storage shall have a user-configured limit with suggested presets such as 5 
+GB, 10 GB, 20 GB or custom. At the limit, the app shall ask the user whether to expand the limit, delete selected 
+offline copies or cancel; it shall not silently delete or expand storage.
+DLD-08  [Must] Background Google Drive download behavior shall be configurable in Settings, including whether 
+downloads continue while the app is in the background and whether persistent notifications are shown.
+9.3 Expiry and extension lifecycle
+EXP-01  [Must] Each offline Drive copy shall have an initial validity period of 30 days, with a five-day grace period 
+after expiry.
+EXP-02  [Must] The app shall issue daily expiry warnings through both in-app notices and Android system 
+notifications, including specific remaining-time warnings such as two days remaining.
+EXP-03  [Must] The user may request an extension by contacting the designated project email within the five-day 
+grace period. The countdown shall continue while the request is pending.
+EXP-04  [Must] An Admin approval shall apply to all offline downloads owned by that user, not an individual file.
+EXP-05  [Must] An approved extension shall add a period selected by an authorized Admin between 1 and 30 days.
+=== PAGE 17 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 17
+EXP-06  [Must] Only one extension request may be pending per user. A second request shall be rejected or 
+disabled until the first is resolved.
+EXP-07  [Must] If a request is rejected, the user shall be notified immediately. The user may submit another 
+request while still within the original five-day grace period.
+EXP-08  [Must] If no extension is approved by the end of the grace period, the app shall delete the affected offline 
+copy when the device is able to enforce the local expiry policy. The original Drive file shall remain untouched.
+EXP-09  [Must] Monthly continuation requires another approval request. The system shall define the next 
+due/expiry timestamp explicitly after each extension to avoid ambiguous overlapping monthly and 30-day cycles.
+EXP-10  [Must] The backend shall be authoritative for extension approval and expiry metadata. Signed records 
+shall be cached locally so that the client can enforce expiry while offline.
+EXP-11  [Must] The app shall be honest that remote deletion cannot be guaranteed while a device is powered off or 
+disconnected. Local deletion shall occur at the next enforceable opportunity; server state shall prevent renewed 
+access when connectivity returns.
+EXP-12  [Must] The system shall sync permitted download names/references, stable Drive IDs, metadata, expiry 
+dates and approval history by account. It shall not upload the actual downloaded media files to this administrative 
+metadata service.
+9.4 Drive caching and sync
+DRV-06  [Must] Drive caching shall support Minimal, Balanced and Aggressive levels, with Balanced as the default.
+DRV-07  [Must] Offline changes shall be saved locally and synchronized when internet connectivity returns.
+DRV-08  [Must] Sync shall be hybrid: important changes may sync immediately; ordinary changes may sync 
+periodically in the background.
+DRV-09  [Must] Conflict resolution shall compare timestamps and use the latest valid update where unambiguous. 
+Ambiguous conflicts shall be shown to the user for manual resolution.
+DRV-10  [Must] Offline-library synchronization shall not upload source media unless the user explicitly requests 
+such an operation.
+10. Secret Vault and privacy controls
+10.1 Vault protection model
+VLT-01  [Must] The Secret Vault shall encrypt media and associated metadata, including names and thumbnails, so 
+that plaintext metadata is not exposed through ordinary library indexing.
+VLT-02  [Must] The vault shall use authenticated encryption such as AES-256-GCM with unique nonces and 
+managed keys. Key material shall be protected with Android Keystore where available, preferably hardware-
+backed.
+VLT-03  [Must] Vault media shall not be exposed through Android MediaStore or ordinary gallery indexing.
+VLT-04  [Must] Vault playback shall decrypt data for playback through a controlled stream or temporary buffer. It 
+shall not create persistent plaintext extraction files unless a separately authorized export operation is added.
+VLT-05  [Must] The Vault shall support optional app PIN and biometric access controls, plus configurable auto-lock 
+on backgrounding and after inactivity.
+VLT-06  [Must] Screenshots and screen recording shall be blocked while Vault content is visible, subject to Android 
+platform capabilities.
+VLT-07  [Must] Sensitive previews shall be hidden from the Android Recent Apps screen.
+=== PAGE 18 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 18
+10.2 Transactional move into Vault
+1.  Obtain the relevant file/folder access authorization and verify the source can be read.
+2.  Create a unique staging record and encrypt into private app storage. Do not delete or overwrite the source 
+at this stage.
+3.  Calculate and verify integrity/authentication metadata for the encrypted result; confirm all expected bytes 
+and metadata are present.
+4.  Commit the encrypted vault object and metadata atomically, or mark the transaction incomplete if the 
+commit fails.
+5.  Only after a successful commit and user-authorized move operation may the app delete the original file. If 
+any step fails, roll back staging and preserve the original.
+6.  On crash recovery, detect incomplete transactions and either complete verification or restore a safe pre-
+commit state. Do not create duplicate canonical vault entries.
+Flash-storage limitation
+Application-level deletion can remove directory references and overwrite accessible temporary data, but flash 
+translation layers, snapshots and wear-leveling may retain physical remnants. The app must never promise forensic-
+grade physical secure erase.
+10.3 Vault key recovery
+VLT-08  [Must] Vault recovery shall be based on the user Google account without requiring an additional user-
+created recovery password, as selected for the Vault feature.
+VLT-09  [Must] The backend may maintain server-side encrypted key escrow. It shall never store or expose 
+plaintext vault keys to administrators or support dashboards.
+VLT-10  [Must] When restoring to another device, the recovered key shall be re-protected under the new device 
+key and account context before use.
+VLT-11  [Must] Vault recovery shall remain distinct from administrator recovery-code recovery and from app-
+settings backup password recovery.
+VLT-12  [Must] Recovery shall be audited and should notify the account owner. Account compromise is a residual 
+risk and must be mitigated with Google account security, device checks and recovery alerts.
+11. Backup, restore and cloud-storage management
+11.1 Backup scope
+BKP-01  [Must] The application shall support manual and automatic backups.
+BKP-02  [Must] The scheduled backup cadence shall include a daily incremental backup for current data and a 
+weekly full backup. Critical metadata shall be protected by the daily schedule, and important changes, imports, 
+migrations and recovery operations shall trigger additional restore points.
+BKP-03  [Must] Incremental backups shall capture changed data relative to a verified baseline/chain. The system 
+shall track dependencies, validate each incremental chain and preserve the required full-backup base before any 
+authorized deletion or offload operation.
+BKP-04  [Must] App settings backups shall include settings, custom profiles, playlists/favorites metadata, titles and 
+references, playback history/resume positions, bookmarks, subtitle preferences, folder names and indexing 
+configuration.
+=== PAGE 19 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 19
+BKP-05  [Must] Ordinary app-settings backups shall not include actual local media files or Google Drive 
+credentials/tokens. Media files shall only be included by a separate explicit user-authorized media backup 
+operation if such a feature is later approved.
+BKP-06  [Must] Administrator backups shall be comprehensive and include administrator accounts/roles, user 
+records, request and approval history, security logs, device history, backup configuration and administrative 
+settings, while excluding plaintext secrets, private keys and active session tokens.
+BKP-07  [Must] Cross-device app backup restoration shall require the same Google account and the user-created 
+backup password where applicable. Vault key recovery remains a separate account-based process.
+11.2 Compression and encryption
+BKP-08  [Must] Backup archives shall be compressed before encryption.
+BKP-09  [Must] Each backup shall receive a unique randomly generated encryption key. The archive shall use 
+authenticated encryption such as AES-256-GCM.
+BKP-10  [Must] Backup-key recovery shall support both the designated recovery-code pathway and the backup-
+password pathway selected for the backup system. These credentials shall not be used directly as raw AES keys.
+BKP-11  [Must] Encryption keys shall be wrapped/derived using approved key-management mechanisms. The 
+system shall use strong password-based KDF parameters for password-derived protection and shall not embed 
+secrets in the APK.
+BKP-12  [Must] Backups shall be encrypted locally before upload. Data in transit shall use TLS 1.3 where 
+supported; stored backups shall receive provider/server at-rest protection in addition to archive encryption.
+BKP-13  [Must] Backup files shall use randomized filenames in cloud storage. Local interfaces may show readable 
+metadata without exposing secrets.
+BKP-14  [Must] No plaintext password, recovery code, master access code, raw biometric data, private key or 
+active session token shall appear in a backup, filename, dashboard or log.
+11.3 Storage quota and retention
+BKP-15  [Must] The primary app/server backup storage target shall be capped at 5 GB by default. Connected cloud 
+storage shall provide additional capacity outside this primary quota.
+BKP-16  [Must] When primary storage approaches 70% usage, the system shall begin evaluating oldest-backup 
+offloading according to the configured policy.
+BKP-17  [Must] The system shall offload the minimum number of oldest eligible backups needed to release 
+required primary storage capacity.
+BKP-18  [Must] After a cloud replica has passed upload, encryption, integrity and successful retrieval verification, 
+the primary-storage archive may be removed while its metadata, unique ID, verification record and restore-point 
+entry remain.
+BKP-19  [Must] Cloud-offloaded backups shall be retained indefinitely until explicitly deleted by an authorized 
+administrator.
+BKP-20  [Must] When the primary 5 GB storage limit is reached and space cannot be safely freed, the system shall 
+ask whether to replace eligible older backups or connect additional cloud storage. It shall never silently delete or 
+overwrite a restore point.
+BKP-21  [Must] When an offload account is disconnected, full or unavailable, the system shall pause offloading and 
+ask the Main Admin whether to use another connected account or stop. It shall not automatically switch to another 
+account without that decision.
+BKP-22  [Must] Only one secondary cloud account shall receive a specific backup replica at a time under the 
+current baseline. Multiple accounts may be connected for capacity planning and sequential offload.
+=== PAGE 20 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 20
+BKP-23  [Must] Manual movement of backups between connected accounts is not required. Offloading shall follow 
+the automatic policy.
+11.4 Provider support
+BKP-24  [Must] The backup subsystem shall use extensible provider adapters for supported cloud storage services.
+BKP-25  [Must] Desired providers include Google Drive, OneDrive, Dropbox and Proton Drive, including multiple 
+accounts for a supported provider.
+BKP-26  [Must] The Main Admin alone shall connect additional backup-storage accounts/providers.
+BKP-27  [Must] Before a provider is enabled, the adapter shall test required upload, download, listing, deletion and 
+retrieval operations using temporary test data where the provider supports them.
+BKP-28  [Must] The storage dashboard shall show connected provider accounts, capacity when available, used/free 
+space, backup allocations, connection health and last successful verification.
+BKP-28A  [Must] Connected cloud accounts shall receive a scheduled daily connection and capacity/health check, 
+with provider-specific limits clearly reported.
+11.5 Restore points and integrity
+BKP-29  [Must] Restore points shall be created before major administrative changes, imports, migrations, backup 
+operations and recovery operations.
+BKP-30  [Must] The system shall retain as many restore points as the storage policy allows. If capacity requires 
+replacement, the Main Admin shall be asked before older restore points are removed.
+BKP-31  [Must] Every backup shall receive a unique ID and a tamper-evident verification record.
+BKP-32  [Must] Integrity shall be verified after creation, during periodic checks and before restoration.
+BKP-33  [Must] Weekly isolated restoration tests shall verify that backups can be decrypted and restored in a 
+controlled environment without overwriting production data.
+BKP-34  [Must] If a backup is corrupted, the system shall attempt the previous valid backup and notify both Super 
+Admins. The corrupted object should be retained for investigation if safe and storage permits.
+BKP-35  [Must] Backup and restore operations shall support pause/resume where technically safe.
+BKP-36  [Must] Failed backup jobs shall retry up to three times with increasing delays. If all retries fail, the process 
+shall stop and create a request for Main Admin approval before further retries or manual intervention.
+BKP-37  [Must] Backup health reports shall be generated weekly and monthly.
+BKP-38  [Must] Backup creation and restoration shall notify both Super Admins through email, admin dashboard 
+and Android push notification.
+11.6 Restore permissions and behavior
+BKP-39  [Must] Backup export and backup restoration shall be separate permissions.
+BKP-40  [Must] Any administrator granted backup-restoration permission may perform authorized restoration. 
+Either Super Admin may grant that permission.
+BKP-41  [Must] The restore interface shall support both full-system restoration and selective restoration by data 
+category.
+BKP-42  [Must] Before restoration, the interface shall preview restore point date, contents, versions and detected 
+conflicts.
+BKP-43  [Must] The system shall merge restored data while preserving newer valid records where possible. 
+Conflicts that cannot be resolved reliably shall be surfaced for administrator review.
+=== PAGE 21 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 21
+BKP-44  [Must] Before every restore, the system shall automatically create a backup/restore point of the current 
+state.
+BKP-45  [Must] Full-system restoration shall require maintenance mode and approval from another Super Admin. 
+Selective restoration shall follow delegated permission without mandatory second-admin approval unless the 
+selected category is marked critical.
+BKP-46  [Must] The system shall support restoration on a new server or fresh installation after identity, 
+authorization and key-recovery verification.
+BKP-47  [Must] Restoration shall be transactional. If the operation fails, the system shall roll back to the pre-
+restore state or preserve a recoverable snapshot.
+11.7 Removed administrator records
+BKP-48  [Must] When an administrator is removed, the system shall package their relevant administrative records 
+into an encrypted archive (such as an encrypted ZIP) and make it securely available to all configured Main Admins 
+and Super Admins.
+BKP-49  [Must] The archive shall be distributed through authenticated, access-controlled download links or a 
+secure admin portal; raw sensitive data shall not be attached unencrypted to ordinary email.
+BKP-50  [Must] The archive shall preserve audit history and record who accessed or downloaded it. Its retention 
+and deletion shall follow the administrative retention policy.
+BKP-51  [Must] Only Super Admins may manually delete restore points.
+BKP-52  [Must] Deleting a backup or restore point shall require fresh password/2FA verification and explicit 
+confirmation. The system shall identify dependent incremental chains before deletion and preserve any required 
+recovery base.
+12. Administrator console and security governance
+12.1 Login and session policy
+ADM-01  [Must] Administrator login shall use pre-approved Google accounts and mandatory 2FA. There shall be 
+no public sign-up.
+ADM-02  [Must] A new administrator device shall require Google login and 2FA only; approval from another 
+Super Admin or an existing device is not required for the ordinary new-device login path.
+ADM-03  [Must] A new-device login notice shall be sent only to the Super Admin who signed in. This is an explicit 
+exception to broader security-event notifications.
+ADM-04  [Must] Each Super Admin may have a maximum of two active administrator devices/sessions. A third 
+login shall require the Super Admin to choose an existing session to terminate.
+ADM-05  [Must] Admin sessions shall expire after 30 minutes of inactivity.
+ADM-06  [Must] Critical operations shall require fresh authentication and 2FA even within an otherwise active 
+session. Examples include ownership transfer, master/recovery code changes and global-lockdown deactivation.
+ADM-07  [Must] The device list shall show detected device name/model, custom name, login date, last activity and 
+active/revoked state. A Super Admin may rename their own device.
+ADM-08  [Must] A Super Admin shall be able to revoke an individual device/session. Revocation shall immediately 
+terminate active access and revoke associated tokens.
+ADM-09  [Must] After revocation, re-registration of that device shall require a fresh Google login and 2FA.
+ADM-10  [Must] Failed login attempts shall trigger progressive lockout periods and immediate alerts to the 
+affected Super Admin. Attempts and signals shall be recorded without logging credentials or OTP values.
+=== PAGE 22 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 22
+12.2 Account recovery and recovery code
+REC-01  [Must] If a Super Admin loses access, the system shall first evaluate device ownership using registered 
+device cryptographic identity, device-bound keys, prior registration records and risk signals.
+REC-02  [Must] Device verification shall not rely solely on Android ID, model name, IP address or other spoofable 
+fingerprints. Hardware-backed cryptographic proof shall be used when available.
+REC-03  [Must] If device verification is unavailable or fails because the device/account is lost, the designated 
+recovery/reset code shall enable the controlled recovery path to reset access, add/replace administrator email 
+identities and import an encrypted administrator backup.
+REC-04  [Must] The recovery code shall remain valid after successful recovery until the Main Admin changes it.
+REC-05  [Must] Changing the recovery code shall require the existing recovery code, Google login and 2FA. The 
+Main Admin alone may change it.
+REC-06  [Must] The recovery code shall be stored as a secure verifier or protected key-wrapping input, never in 
+plaintext logs, dashboards, APK resources or ordinary database records.
+REC-07  [Must] The bootstrap recovery value supplied by the product owner shall be provisioned through a secure 
+deployment/setup workflow. The value shall not be printed in this SRS. Because a human-selected word is low 
+entropy, production deployment shall require replacement with a long randomly generated secret.
+REC-08  [Must] Recovery shall support adding a replacement email and importing a verified encrypted 
+administrative backup, with a complete audit record and notification.
+REC-09  [Must] Recovery-code verification shall be rate-limited, progressively locked after repeated failures and 
+monitored for suspicious patterns.
+12.3 Master access code and privileged actions
+ADM-11  [Must] The product shall maintain a privileged master access-code mechanism for designated 
+administrative operations, separate from Pro Mode entitlement and separate from Development Mode activation.
+ADM-12  [Must] Authorized Super Admins shall authenticate with Google login and 2FA before presenting the 
+master access code for operations that require it.
+ADM-13  [Must] The Main Admin may change the master access code. The change shall require fresh Google 
+authentication, 2FA and validation of the current code; the old code shall be invalidated immediately.
+ADM-14  [Must] The master access code shall be stored as a strong verifier using a modern password-hashing 
+scheme with unique salt and appropriate parameters. It shall never be embedded as plaintext in the APK or 
+displayed in dashboards/logs.
+ADM-15  [Must] The current bootstrap value is not repeated in this document. A low-entropy bootstrap value must 
+be rotated to a high-entropy secret before production.
+ADM-16  [Must] When a Super Admin email is replaced or supplemented during recovery, the previous email shall 
+remain registered until an authorized administrator explicitly removes it. Replacement shall not silently revoke 
+the former identity.
+12.4 Audit and monitoring
+AUDIT-01  [Must] Security and administrator audit records shall be append-only and tamper-evident. 
+Administrators, including Super Admins, shall not be able to edit or delete audit records.
+AUDIT-02  [Must] Security audit history shall be retained permanently under the product policy. Storage lifecycle 
+shall archive records without changing their evidentiary integrity.
+AUDIT-03  [Must] Audit events shall cover authentication, failed attempts, device registration/revocation, role 
+changes, ownership transfers, code changes, recovery, exports, backup/restore, storage-provider changes, 
+lockdown and sensitive data access.
+=== PAGE 23 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 23
+AUDIT-04  [Must] Both Super Admins shall be able to view all administrator activity, subject to masking of secrets, 
+passwords, tokens, private keys and raw biometric data.
+AUDIT-05  [Must] Every access to audit logs shall itself be recorded.
+AUDIT-06  [Must] Automated behavior monitoring shall flag unfamiliar devices/locations, unusual user-record 
+access, repeated sensitive changes, permission changes, abnormal access patterns/times and unusual recovery or 
+ownership operations.
+AUDIT-07  [Must] Monitoring shall use risk-based thresholds and allow review to reduce false positives. It shall 
+not silently grant privileges or automatically delete records.
+12.5 Security alerts and emergency controls
+SEC-01  [Must] Comprehensive security alerts shall cover unauthorized admin logins, code changes, ownership 
+transfer, recovery, suspicious device changes, repeated failures and unusual behavior.
+SEC-02  [Must] Security alerts shall use email, admin dashboard and Android push notification for both Super 
+Admins unless an explicit exception is documented, such as new-device login notice being sent only to the signing-
+in Super Admin.
+SEC-03  [Must] The system shall support temporary restrictions on suspicious accounts/devices, session revocation, 
+notifications and evidence preservation.
+SEC-04  [Must] Either Super Admin may independently activate global lockdown.
+SEC-05  [Must] Global lockdown shall have no automatic expiry. Both Super Admins shall receive reminders every 
+three hours, each containing a current security report.
+SEC-06  [Must] The lockdown report shall summarize login attempts, blocked devices, suspicious activity, current 
+status, administrator actions and pending requests.
+SEC-07  [Must] Either Super Admin may independently deactivate global lockdown, but deactivation shall require 
+fresh authentication, 2FA and the master access code, plus a stated reason and permanent audit entry.
+SEC-08  [Must] Global lockdown activation/deactivation shall notify both Super Admins through email, dashboard 
+and Android push.
+12.6 Three-layer security model
+Layer Requirement Engineering interpretation
+Transport TLS 1.3
+Protect API/network traffic in transit. 
+Endpoints must reject invalid certificates 
+and use secure certificate validation.
+Application payload Authenticated payload encryption such as AES-256-GCM
+Sensitive request/response payloads may 
+be envelope-encrypted at application 
+level with nonce, key ID, authentication 
+tag, replay protection and authenticated 
+identity context.
+Storage at rest Managed server-side encryption at rest
+Encrypt databases, backups and object 
+storage with managed key rotation and 
+least-privilege access. This is not a 
+second transport layer.
+The three layers are complementary, not interchangeable. TLS protects transport; application payload 
+encryption protects selected data beyond the transport termination point; server-side encryption protects 
+stored data. Authentication, authorization, signatures, replay protection, audit and key lifecycle controls 
+remain mandatory in addition to encryption.
+=== PAGE 24 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 24
+13. Data model and information classification
+13.1 Core entities
+Entity Key fields / purpose Sensitivity
+MediaItem
+Stable local/Drive reference, source, 
+path/Drive ID, title, format, duration, 
+resolution, codec metadata, thumbnail 
+reference.
+Personal content metadata
+PlaybackState
+Media reference, last position, speed, 
+selected tracks, resume preference, last 
+played.
+Personal usage data
+Playlist / Favorite Playlist ID, item references, order, title, favorite grouping. Personal usage data
+VaultObject
+Encrypted object ID, nonce/tag metadata, 
+key reference, ciphertext location, 
+transaction state.
+Highly sensitive
+OfflineDownload Drive ID, owner, destination, file metadata, expiry, extension state, signature. Account/entitlement data
+BackupManifest
+Backup ID, version, type, date, content 
+manifest, encrypted key envelope, integrity 
+hash.
+Highly sensitive
+AdminAccount Preapproved identity, role, owner flag, 2FA state, account state. Privileged identity
+AdminDevice Registration ID, public key, device metadata, trusted status, session list. Privileged security data
+AdminSession Session ID, issue/expiry/last activity, device ID, revocation status. Privileged security data
+AuditEvent
+Immutable event ID, actor, action, target, 
+timestamp, context, previous 
+hash/signature.
+Security evidence
+CloudAccount Provider, encrypted token reference, scopes, capacity/health, connection state. Credential metadata
+13.2 Data that must never be logged or exported in plaintext
+ Recovery code and master access code
+ Google OAuth refresh/access tokens and provider credentials
+ Passwords, OTP/2FA codes and raw authentication challenge responses
+ Private keys, raw vault keys and unwrapped backup data-encryption keys
+ Raw biometric templates or raw face data
+ Plaintext Secret Vault media names/content where the vault metadata model requires encryption
+13.3 Retention principles
+Playback history is retained until the user clears it. Offline Drive copies follow the 30-day validity plus five-day 
+grace and approved-extension process. Cloud-offloaded backups are retained indefinitely until authorized 
+=== PAGE 25 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 25
+deletion. Security audit logs are permanent and immutable. Other data categories shall receive explicit 
+retention periods during implementation and privacy review.
+14. External interfaces and integration requirements
+14.1 Android interfaces
+ Media session and notification controls
+ Foreground service for eligible background audio/download tasks
+ Storage Access Framework and scoped storage APIs
+ Picture-in-Picture and multi-window APIs
+ Android Keystore and biometric prompt
+ Audio routing/device callback APIs
+ Display mode and refresh-rate APIs where supported
+ Network/battery/thermal signals within OS permissions and policy
+ APK update/download and package installer handoff
+14.2 Google identity and Drive
+Google Sign-In identity and Google Drive file scopes shall be requested separately and with least privilege. The 
+app shall support account linking/disconnection, token revocation, safe refresh and clear UI for the difference 
+between app identity and Drive access.
+14.3 Subtitle and lyrics providers
+Provider adapters shall isolate external APIs, rate limits, attribution requirements, content matching, caching 
+and failure states. User consent and provider terms must be respected. Local subtitle functionality shall 
+remain available when providers are offline.
+14.4 Backup cloud providers
+Each storage provider shall be implemented behind a capability interface. The adapter shall report whether it 
+supports list, upload, download, checksum/verification, deletion, quota information and account 
+disconnection. Unsupported operations shall be disabled or handled with an explicit warning.
+14.5 Backend API groups
+API group Representative operations
+Identity and devices Admin login callbacks, 2FA verification state, device registration, session listing/revocation, device-key challenge.
+Development Mode Code validation, activation, expiry, device entitlement, revocation, audit events.
+Offline download policy Register download metadata, expiry status, extension request, approval/rejection, signed policy retrieval.
+Administrator governance Role changes, ownership transfer, master/recovery configuration, global lockdown.
+Backup management Backup manifest registration, storage providers, replication jobs, restore points, health reports and restore approvals.
+Notifications Email, dashboard, Android push events and alert preferences.
+=== PAGE 26 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 26
+15. Non-functional requirements
+15.1 Performance and responsiveness
+NFR-P01  [Must] Core UI navigation and controls shall remain responsive while media scan, conversion, backup or 
+download tasks run in the background.
+NFR-P02  [Must] The application shall avoid blocking the UI thread with decoding, database scans, file hashing, 
+encryption or conversion work.
+NFR-P03  [Must] Playback startup, seek response and rendering performance shall be benchmarked across low-, 
+mid- and high-tier Android devices. Target values shall be set after prototype profiling on representative hardware.
+NFR-P04  [Must] The library shall use paging/virtualization and incremental indexing so large libraries do not 
+require loading all records and thumbnails into memory at once.
+NFR-P05  [Must] Thumbnail and media metadata caching shall be bounded and managed automatically.
+NFR-P06  [Must] Processing and parallel jobs shall adapt to memory, battery, thermal and hardware constraints. 
+The user may override only within safe bounds.
+15.2 Reliability and recovery
+NFR-R01  [Must] Core local playback shall remain available without network access.
+NFR-R02  [Must] File operations that move, vault, repair, convert or replace files shall be transactional or use 
+temporary outputs so partial failure does not destroy the source.
+NFR-R03  [Must] Backup, restore, sync and download jobs shall persist recoverable state and support retry after 
+application restart where technically possible.
+NFR-R04  [Must] A failed restore shall return the system to its pre-restore state or preserve an explicitly 
+recoverable snapshot.
+NFR-R05  [Must] Application crashes shall not silently discard unfinished job metadata or mark incomplete 
+encrypted files as valid.
+15.3 Security
+NFR-S01  [Must] Secrets shall be stored using platform/managed secure storage and shall never be hardcoded in 
+APK resources, source-controlled configuration or logs.
+NFR-S02  [Must] Use least-privilege permissions, short-lived access tokens, refresh-token protection, role checks 
+and server-authoritative decisions.
+NFR-S03  [Must] Cryptographic operations shall use vetted libraries and safe nonce/IV management. Custom 
+cryptography is prohibited.
+NFR-S04  [Must] All security-sensitive endpoints shall validate authorization on the server, not only in the client 
+UI.
+NFR-S05  [Must] Sensitive actions shall have audit records and appropriate reauthentication requirements.
+15.4 Privacy and accessibility
+NFR-PR01  [Must] Analytics/usage collection shall be consent-gated during first installation and remain disabled 
+when consent is refused.
+NFR-PR02  [Must] Crash/diagnostic reporting shall be consent-gated per report unless the user explicitly enables 
+future consent.
+=== PAGE 27 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 27
+NFR-PR03  [Must] The product shall provide app-specific accessibility controls and follow Android font scaling, 
+screen reader and system accessibility preferences.
+NFR-PR04  [Must] Sensitive Vault surfaces shall be protected from screenshots/recording and Recent Apps 
+previews where supported.
+15.5 Maintainability and observability
+NFR-M01  [Must] Media engine, decoder, renderer, processing stages, cloud providers and backup providers shall 
+be separately replaceable modules.
+NFR-M02  [Must] Diagnostics shall include non-sensitive technical state such as engine path, decoder choice, codec 
+metadata and failure code, but must redact credentials and content.
+NFR-M03  [Must] Builds shall support reproducible configuration, automated tests and staged rollout of native 
+processing changes.
+NFR-M04  [Must] The system shall maintain compatibility/version fields for backups, encrypted manifests, settings 
+schemas and native plugin interfaces.
+16. Key workflows and state transitions
+16.1 Playback and decoder fallback
+1.  User selects a local or Google Drive media item.
+2.  The source adapter validates access and retrieves metadata/stream information.
+3.  The capability manager probes available decoders, rendering paths, HDR support and output route.
+4.  The policy selects HW, HW+, SW or hybrid path based on compatibility and prior failure signals.
+5.  Playback starts and emits status/diagnostic events.
+6.  If decoding or rendering fails, the recovery controller retries an alternative compatible path.
+7.  If damage remains, attempt frame recovery and skip irrecoverable frames where safe.
+8.  If all paths fail, show a clear error with optional consent-based report submission.
+16.2 Vault move transaction
+1.  Authorize source read/write access.
+2.  Create transaction ID and encrypted staging output.
+3.  Stream encryption and calculate authenticated integrity state.
+4.  Verify staged ciphertext and metadata.
+5.  Atomically commit canonical Vault object.
+6.  Only then delete original when the user explicitly selected move.
+7.  On error/crash, preserve source and safely clean or resume staging.
+16.3 Offline Drive expiry
+1.  User downloads the original-quality file and selects destination.
+2.  Backend records stable Drive ID, owner, metadata, original timestamp and initial 30-day expiry.
+3.  Client stores signed expiry metadata and schedules daily in-app and OS notices.
+4.  Within the five-day grace period, the user may request an extension by designated email.
+5.  Admin approves one extension of 1-30 days for all offline downloads of that user, or rejects the request.
+6.  If rejected, the user is notified immediately and may submit a new request while grace remains.
+=== PAGE 28 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 28
+7.  If no approval is valid at deadline, local offline copy is deleted at the next enforceable opportunity; original 
+Drive file is untouched.
+8.  Next monthly approval cycle is scheduled from the resulting policy timestamp.
+16.4 Backup offload
+1.  Primary backup storage usage is monitored.
+2.  At 70% usage, select oldest eligible backups and calculate the minimum amount to offload.
+3.  Choose the currently designated secondary account and test its health/capabilities.
+4.  Compress if not already compressed, encrypt locally, upload and verify integrity/retrieval.
+5.  Only after successful verification, remove primary archive while retaining manifest and restore-point 
+reference.
+6.  If the account is disconnected/full/unavailable, pause and ask the Main Admin whether to use another 
+account or stop.
+7.  If primary storage reaches the 5 GB cap without safe offload capacity, request Main Admin decision to 
+replace eligible older backups or add storage.
+16.5 Administrator recovery
+1.  Super Admin begins recovery from an available device or recovery interface.
+2.  The service challenges the registered device key and verifies cryptographic device ownership and 
+historical registration.
+3.  If device proof succeeds, restore the authorized account access path after risk checks.
+4.  If device verification is unavailable or fails, request the recovery/reset code.
+5.  A valid recovery code permits controlled access reset, email replacement/addition and encrypted 
+administrator-backup import.
+6.  Record all attempts, verification results and resulting changes in immutable audit history.
+7.  Notify the appropriate administrators according to the recovery-notification policy.
+16.6 Global lockdown
+1.  Either Super Admin initiates lockdown and reauthenticates as required.
+2.  Backend marks protected operations and configured access paths as locked down.
+3.  Sessions/tokens may be restricted or revoked according to incident policy.
+4.  Both Super Admins receive email, dashboard and push alerts.
+5.  Every three hours, both receive a current security report while lockdown remains active.
+6.  Either Super Admin may deactivate after fresh auth, 2FA, master code and a recorded reason.
+17. Acceptance criteria
+The following criteria are release-gate examples. Detailed device matrices, quantitative performance targets 
+and exact provider API contracts shall be baselined during implementation planning.
+Area Acceptance condition
+Responsive UI
+Video, Audio, Tools and Settings adapt across tested 
+phone/tablet/window sizes and orientations without clipped core 
+controls.
+=== PAGE 29 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 29
+Area Acceptance condition
+Decoder fallback
+Inject or simulate a decoder initialization failure and verify 
+automatic fallback through an alternative supported 
+HW/HW+/SW/hybrid path.
+Gestures A single tap reveals controls; controls hide; left/right double-tap seeks 10 seconds; center Previous/Next changes media items.
+HDR HDR content uses supported HDR output; on unsupported SDR path, tone mapping produces visible output without a crash.
+Audio
+Background audio follows Settings; headset controls work where 
+platform route exposes them; queue and playlist import/export 
+pass tests.
+Library
+All accessible supported media is indexed; exclusions and hidden-
+file settings are respected; duplicate detection never silently 
+deletes source media.
+Subtitles Local subtitle auto-match and manual selection work; offset can be adjusted; unsupported format fails gracefully.
+Tools
+Conversion preserves the source according to chosen preference; 
+batch queue can pause/resume/cancel/reorder; audio extraction 
+preserves original stream when possible.
+Enhancement
+Deblur, denoise and upscale stages can be individually 
+enabled/disabled and tested; output is labelled as upscaled where 
+appropriate.
+Drive downloads
+Original bytes are preserved; pause/resume/retry work; expiry 
+warnings appear; expiry deletes only offline copy and never 
+original Drive item.
+Vault Interrupted move never deletes original before verified encrypted commit; Vault data is not exposed to ordinary media indexing.
+Backups
+Archive is compressed before encryption, has independent key 
+and integrity ID, verifies after creation and restores in isolated 
+tests.
+Offload
+Primary backup is removed only after remote retrieval 
+verification; failed cloud account causes Main Admin prompt and 
+no silent provider switch.
+Admin security Admin login requires preapproved Google identity and 2FA; 30-minute idle timeout; max two active devices per Super Admin.
+Audit Administrator actions are append-only, tamper-evident and cannot be edited/deleted through admin UI/API.
+Recovery
+Device-key verification and recovery-code fallback work in 
+controlled tests; recovery code is never logged or stored in 
+plaintext.
+Consent Analytics and crash reporting remain disabled without user consent and respect later Settings changes.
+=== PAGE 30 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 30
+18. Verification and test strategy
+18.1 Test levels
+ Unit tests for scanner rules, decoder policy, subtitle matching, expiry calculations, role/permission checks, 
+backup manifests, encryption wrappers and processing stages.
+ Integration tests for Flutter/native boundary, engine adapter, Android storage access, Keystore, Drive API, 
+notification services, provider adapters and backend APIs.
+ End-to-end tests for playback, download, conversion, Vault movement, backup, restoration, administrator 
+login/recovery and lockdown.
+ Device compatibility tests across low/mid/high tiers, multiple Android versions, SoC families, hardware 
+decoders, Vulkan support, HDR display paths, audio output paths and thermal conditions.
+ Security tests including threat modeling, permission bypass attempts, replay attempts, token leakage 
+checks, tamper detection, rate limiting, session revocation and storage inspection.
+ Resilience tests including process death, reboot, network loss, provider outage, corrupted media, partial 
+upload, disk full, backup corruption and interrupted restore.
+ Accessibility tests for screen reader navigation, focus order, large text, contrast, reduced motion and touch 
+target sizes.
+18.2 Mandatory failure-injection scenarios
+ Kill the process during Vault staging, commit and original deletion phases.
+ Interrupt a cloud upload at several offsets and verify that incomplete objects are not considered valid 
+replicas.
+ Corrupt a backup manifest, ciphertext block or authentication tag and verify rejection plus previous-valid-
+backup fallback.
+ Expire a Drive offline copy while the device is offline, then reconnect and verify signed expiry 
+enforcement and original-file preservation.
+ Attempt a third administrator device session and verify explicit choice of session to terminate.
+ Revoke an administrator device and verify immediate session/token invalidation.
+ Attempt admin audit modification/deletion through UI and API; verify denial and audit of the attempt.
+ Force a decoder failure and verify alternate decoder path without losing playback position unnecessarily.
+ Run processing under low battery/high thermal state and verify adaptive reduction/override behavior.
+18.3 Security review gates
+TEST-S01  [Must] No release may ship with hardcoded recovery, master, development or provider credentials.
+TEST-S02  [Must] No release may ship with unresolved critical/high severity security findings in authentication, 
+Vault encryption, backup encryption, admin authorization or cloud token handling.
+TEST-S03  [Must] The security team shall review cryptographic key lifecycle, recovery, rotation and compromise 
+scenarios before production activation.
+19. Delivery phases and release gates
+Phase Primary scope Exit gate
+0. Technical validation
+Engine/library licensing; Android device 
+capability survey; Flutter/native bridge 
+spike; cloud provider API feasibility; 
+security architecture review.
+Approved component shortlist, risk 
+register, architecture decisions and proof-
+of-concept playback.
+=== PAGE 31 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 31
+Phase Primary scope Exit gate
+1. Core player foundation
+Flutter shell, Video/Audio/Tools/Settings 
+navigation, local scanning, core decoder 
+paths, playback controls, preferences and 
+crash UI.
+Core local playback, responsive UI, library 
+scan and fallback tests pass.
+2. Player completeness
+Subtitles, audio player, history/resume, 
+playlists, PiP, gestures, HDR/refresh 
+matching and initial tools.
+Functional acceptance for 
+video/audio/subtitle workflows.
+3. Pro and enhancement
+Pro UI, profiles, graphics detection, 
+deblur/denoise/upscale pipeline, preview 
+and conversion pipeline.
+Device benchmarks and independent 
+processing-stage test evidence.
+4. Cloud and offline
+Google Drive browsing/streaming, 
+download manager, original-quality copies, 
+expiry/extension policy and Drive sync.
+Drive OAuth/security review and offline 
+expiry tests.
+5. Vault and backup
+Transactional Vault, key recovery, app 
+backups, restore points, cloud provider 
+adapters and offload.
+Crypto review, interrupted-operation tests 
+and successful isolated restore tests.
+6. Admin and Dev Mode
+Admin login/2FA, role system, device 
+sessions, audit/monitoring, Dev Mode 
+activation, recovery and lockdown.
+Penetration testing, permission matrix 
+validation and recovery/lockdown drills.
+7. Stabilization and release
+Accessibility, localization, performance, 
+thermal testing, APK update flow, 
+documentation and support runbooks.
+Release checklist, privacy consent 
+validation and signed release package.
+Development sequencing may overlap, but cryptographic foundations, data schemas, engine selection and 
+provider feasibility should be validated early because they influence many downstream components.
+20. Risks, dependencies and mitigations
+Risk / dependency Impact Mitigation / decision
+Device fragmentation
+Different SoCs and Android versions expose 
+different decoder, GPU, NPU and HDR 
+capabilities.
+Capability-probe at runtime; maintain 
+fallback paths; validate device tiers; avoid 
+hard-coded assumptions.
+Upscaling expectations Users may interpret 360p-to-1080p output as native 1080p quality. Label upscaled output; provide before/after preview; document that new detail is estimated, not recovered certainty.
+Thermal/battery limits Heavy processing can heat devices and degrade battery/performance. Adaptive pipeline, thermal-aware concurrency, Eco/Balanced/Performance modes and safe manual overrides.
+Cloud provider API coverage Some providers may not offer suitable public APIs for all selected operations. Prototype provider capability early; only support official/approved APIs; expose capability matrix and partial support.
+Offline expiry enforcement Remote commands cannot reach disconnected/powered-off devices.
+Signed local expiry records, secure 
+timestamps where available, enforcement 
+at next app execution and server-side 
+denial on reconnect; state residual 
+limitation.
+=== PAGE 32 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 32
+Risk / dependency Impact Mitigation / decision
+Device identity Android IDs and fingerprints are mutable/spoofable.
+Bind using registered device keys and 
+hardware-backed Keystore where 
+available; treat identifiers as supplemental 
+signals.
+Vault recovery escrow Server-side escrow creates a high-value recovery target.
+Encrypt escrow, separate duties, harden 
+key access, alert on recovery, audit every 
+operation and conduct external security 
+review.
+Backup key loss If all recovery mechanisms are lost, encrypted backups may be unrecoverable. Multiple carefully separated recovery paths, offline recovery material, verified key rotation and periodic restore drills.
+Crypto misuse Nonce reuse, weak KDF parameters or secret leakage can invalidate encryption. Use vetted libraries, unique nonces, per-backup keys, key wrapping, code review and cryptographic tests.
+Third-party licensing Media codecs and engines may impose redistribution/attribution requirements. Complete legal/licensing review before selecting and packaging libraries.
+Storage exhaustion Primary backup quota or device storage may fill. 70% offload trigger, 5 GB quota warning, admin prompts, no silent deletion and storage dashboard.
+Administrative compromise Compromised Super Admin credentials can threaten the whole system. Mandatory 2FA, device verification, session limits, progressive lockout, immutable logs, alerts and lockdown.
+21. Open implementation decisions
+The product behavior is baselined, but the following engineering choices must be completed during 
+architecture and sprint planning. They are not permission to silently change the agreed behavior.
+ Final media engine and codec-library selection, including license, ABI, maintenance and device-
+compatibility assessment.
+ Exact Android minimum/target SDK policy and supported device/version matrix.
+ Concrete backend hosting, database, queue, object storage, key management service and observability 
+stack.
+ Exact Google Drive scopes and OAuth consent model, plus token revocation and disconnected-account 
+behavior.
+ Provider-by-provider feasibility for OneDrive, Dropbox and multiple Proton Drive accounts; supported 
+operation matrix and rate limits.
+ Exact backup schedule times, time zone behavior, full-backup interval implementation and whether 
+critical-data snapshots are separate from general incremental snapshots.
+ Precise monthly extension renewal rule and how the next 30-day validity period interacts with an Admin-
+approved 1-30 day extension.
+ How offline expiry handles user-cleared app data, APK uninstall/reinstall, device clock rollback and long 
+periods without network.
+ Exact recovery code entropy, provisioning and key-wrapping design. The initial bootstrap value must be 
+rotated before production.
+ Whether the privileged master access code and recovery/reset code use distinct secrets in production. 
+They should be distinct even if an initial bootstrap value was informally reused during discussion.
+=== PAGE 33 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 33
+ Exact hardware support tiers and minimum performance targets for 1080p/4K, high frame rates, HDR and 
+real-time enhancement.
+ Which enhancement models/scalers are approved, their license terms, storage footprint, quality metrics 
+and supported ABI/GPU/NPU paths.
+ Exact external subtitle and lyrics providers, legal terms, attribution, rate limits and cache policy.
+ Default inactivity timeout for the Secret Vault beyond the selected on-background lock behavior.
+ Quantitative thresholds for 70% backup offload, primary 5 GB limit and backup-health alert severities.
+ Operational ownership of the designated project email, manual Development Mode review queue and 
+admin on-call/escalation procedures.
+Baseline rule
+If an implementation detail is not specified, engineering should propose the safest maintainable default, record it as an 
+Architecture Decision Record (ADR), and seek product-owner approval when the choice affects user-visible behavior, 
+privacy, data retention, security or data loss.
+Appendix A. Consolidated decision traceability
+This appendix maps the question batches from requirements discovery to the corresponding SRS areas. 
+Individual question identifiers are retained so later changes can be traced.
+Decision range Topics captured SRS locations
+Q77-Q95
+Admin inactivity session, concurrent 
+devices, new-device sign-in, device 
+names/revocation, failed-login lockout, 
+recovery, recovery code.
+Sections 3, 12, 13, 16
+Q96-Q115
+Backup schedule, 5 GB target, 
+full/incremental backup, restore points, 
+integrity, corruption recovery, admin 
+permissions, provider support and key 
+security.
+Sections 11, 13-18
+Q116-Q135
+Multiple storage accounts, 70% offload 
+threshold, oldest-first offload, verified copy 
+removal, provider failure prompts, 
+compression/encryption, selective restore 
+and recovery.
+Sections 11, 14, 16-18
+Q136-Q145
+Weekly full backups, event/daily 
+increments, retries, encrypted ZIP archival, 
+health reports and restore mode.
+Sections 11, 16-18
+Q146-Q165
+Decoder fallback, damaged frames, HDR, 
+refresh matching, passthrough, subtitle 
+format and sync, PiP, orientation and 
+gestures.
+Sections 7, 15, 17-18
+Q166-Q175
+Background audio, Bluetooth controls, 
+queue, EQ, volume safety, profiles, lyrics, 
+sleep timer and playlist formats.
+Sections 7, 17-18
+Q176-Q185
+Separate libraries, full scanning, 
+exclusions, hidden files, duplicates, layouts, 
+resolution filters and sorting.
+Sections 6-7
+=== PAGE 34 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 34
+Decision range Topics captured SRS locations
+Q186-Q195
+Conversion, quality targets, multi-stage 
+upscaling, source preservation, queues, 
+extraction, frame tools, subtitles and media 
+details.
+Sections 7-8
+Q196-Q205
+Automatic enhancement, separate pipeline 
+stages, deblur/denoise, presets, thermal 
+adaptation, thumbnails, repair and 
+comparison.
+Sections 8, 17-18
+Q206-Q215
+Playback speed, frame stepping, A-B loop, 
+bookmarks, resume, power modes, profiles, 
+per-video preferences, themes and Pro 
+customization.
+Sections 6-8
+Q216-Q225
+Language, opening screen, search, 
+favorites, history, deletion confirmation, 
+manual APK updates, consent, notifications 
+and accessibility.
+Sections 6-7, 15
+Q226-Q235
+PIN/biometric app lock, Vault locking, 
+screenshot prevention, recents privacy, 
+permissions, storage access, background 
+downloads, external displays and data 
+clearing.
+Sections 7, 10, 14-18
+Earlier confirmed baseline
+Flutter/Dart + C/C++, local + Google Drive 
+media sources, Pro and Dev separation, 
+Vault, Dev Mode lifecycle, Drive expiry and 
+admin ownership/security decisions.
+Sections 1-5, 8-14, 20-21
+Appendix B. Glossary and abbreviations
+Term Definition
+A-B repeat Loop playback between a user-selected start point (A) and end point (B).
+AES-256-GCM
+Authenticated encryption with 256-bit AES keys and 
+Galois/Counter Mode; requires safe unique nonce 
+management.
+Admin / Support Admin Delegated roles with narrower permissions than Super Admin.
+Backup DEK Data-encryption key generated for an individual backup archive.
+Device binding
+Association of an account/entitlement with registered 
+cryptographic device identity, not merely a display name or 
+Android ID.
+Development Mode Online-validated, time-limited, device-bound mode for experimental processing and hardware overrides.
+HW / HW+ / SW
+Hardware decoding paths, enhanced/hybrid hardware paths 
+as exposed by the selected engine, and software decoding. 
+Exact semantics must be documented for the chosen engine.
+=== PAGE 35 ===
+STANDARD VIDEO PLAYER  |  SOFTWARE REQUIREMENTS SPECIFICATION
+Confidential product specification  •  Version 1.0  |  Page 35
+Term Definition
+Incremental backup Backup containing data changed since a prior full or incremental backup, according to the selected chain strategy.
+Main Admin / protected owner The designated protected-owner Super Admin with the highest ownership/governance responsibilities.
+NPU Neural Processing Unit; availability and API access depend on device and vendor implementation.
+PiP Picture-in-Picture playback window supported by Android.
+Pro Mode Freely available advanced user-facing controls; not a security or entitlement gate.
+Restore point Verified recovery checkpoint created before important operations or according to backup policy.
+SRS Software Requirements Specification.
+TLS 1.3 Transport Layer Security protocol version 1.3.
+Vault Encrypted private media area with protected metadata, access controls and transactional file movement.
+Vulkan Cross-platform graphics/compute API; availability is detected at runtime and cannot be assumed on every device.
+Baseline sign-off statement
+This document consolidates the product decisions captured through the requirements-discovery process into 
+a single implementation-oriented SRS. It is suitable as the starting point for UX wireframes, technical 
+architecture, backlog decomposition, interface contracts and QA planning. Before production, the open 
+decisions in Section 21 must be resolved and the security-sensitive designs must pass specialist review.
+Release-critical reminders
+Do not hardcode the bootstrap recovery/master secrets. Rotate weak bootstrap credentials before production. Do not 
+send encrypted backup contents as plaintext email attachments. Do not silently delete backups, offline originals or 
+source media. Do not enable Development Mode offline. Do not claim hardware, HDR, Vulkan, NPU, bit-perfect or 
+cloud-provider capabilities without runtime/provider verification.

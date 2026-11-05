@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BinaHub Standard Video Player — Cyber Precision Interactive Design Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'bg-pure-black': '#000000',
+            'surface-carbon': '#111115',
+            'surface-carbon-raised': '#16161C',
+            'border-structural': '#22222A',
+            'primary-cyan': '#00F0FF',
+            'secondary-violet': '#8B5CF6',
+            'signal-green': '#22C55E',
+            'thermal-red': '#EF4444',
+            'warning-amber': '#F59E0B',
+            'text-primary': '#FFFFFF',
+            'text-secondary': '#9CA3AF',
+            'text-muted': '#71717A',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #07090D; color: #FFFFFF; font-family: 'Inter', sans-serif; }
+    .device-shell {
+      width: 412px;
+      height: 915px;
+      border: 3px solid #22222A;
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.15), 0 20px 40px rgba(0,0,0,0.8);
+      position: relative;
+      background-color: #000000;
+    }
+    .screen-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0B0E14; }
+    ::-webkit-scrollbar-thumb { background: #22222A; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Top Navigation Bar -->
+  <header class="bg-surface-carbon border-b border-border-structural px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded bg-primary-cyan text-black flex items-center justify-center font-bold font-mono text-sm shadow-[0_0_10px_rgba(0,240,255,0.4)]">
+        BH
+      </div>
+      <div>
+        <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+          BinaHub <span class="text-xs px-2 py-0.5 rounded bg-primary-cyan/10 text-primary-cyan border border-primary-cyan/30 font-mono">v1.0 Cyber Precision</span>
+        </h1>
+        <p class="text-xs text-text-secondary">Standard Video Player — Interactive Mobile Frontend Showcase</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 text-xs font-mono">
+      <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#16161C] border border-border-structural text-signal-green">
+        <span class="w-2 h-2 rounded-full bg-signal-green animate-pulse"></span>
+        FLUTTER FRONTEND READY
+      </span>
+      <span class="px-2.5 py-1 rounded bg-[#16161C] border border-border-structural text-text-secondary">
+        VIEWPORT: 412 × 915 px
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Showcase Container -->
+  <main class="flex-1 flex flex-col lg:flex-row p-6 gap-6 max-w-7xl mx-auto w-full">
+    <!-- Left: Screen Selection Gallery -->
+    <div class="w-full lg:w-80 flex flex-col gap-4">
+      <div class="bg-surface-carbon p-4 rounded border border-border-structural">
+        <h2 class="text-xs font-mono uppercase tracking-wider text-primary-cyan mb-2">Screen Directory (21 Views)</h2>
+        <p class="text-xs text-text-secondary mb-4">Click any module below to immediately render the high-fidelity UI in the mobile testbed.</p>
+        
+        <div class="space-y-4 max-h-[720px] overflow-y-auto pr-1">
+          <!-- Featured: Unified Interactive App -->
+          <div>
+            <h3 class="text-[11px] font-mono text-primary-cyan uppercase mb-1">★ Complete Mobile App</h3>
+            <button onclick="loadScreen('screen-video-library', this)" class="screen-btn w-full text-left px-3 py-2.5 text-xs rounded border border-primary-cyan bg-[#151C25] text-primary-cyan font-bold flex items-center justify-between shadow-[0_0_12px_rgba(0,240,255,0.2)]">
+              <span class="flex items-center space-x-2">
+                <span class="material-symbols-outlined text-sm">phone_android</span>
+                <span>Unified Interactive App (21 Screens)</span>
+              </span>
+              <span class="text-[10px] font-mono bg-primary-cyan text-black px-1.5 py-0.5 rounded font-bold">ACTIVE</span>
+            </button>
+          </div>
+
+          <!-- Group 1: Core Media & Playback -->
+          <div>
+            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">1. Core Media & Playback</h3>
+            <div class="space-y-1">
+              <button onclick="loadScreen('screen-video-library', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>1. Video Library Grid</span>
+                <span class="text-[10px] font-mono text-primary-cyan">Library</span>
+              </button>
+              <button onclick="loadScreen('screen-video-player', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>2. Video Player HUD (412x915)</span>
+                <span class="text-[10px] font-mono text-primary-cyan">HUD</span>
+              </button>
+              <button onclick="loadScreen('screen-audio-library', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>3. Audio Library & FLAC</span>
+                <span class="text-[10px] font-mono text-secondary-violet">Audio</span>
+              </button>
+              <button onclick="loadScreen('screen-audio-player', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>4. Audio Player & Lyrics</span>
+                <span class="text-[10px] font-mono text-secondary-violet">Vinyl</span>
+              </button>
+              <button onclick="loadScreen('screen-earn', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>5. Earn (Coming Soon - SRS 6.1)</span>
+                <span class="text-[10px] font-mono text-warning-amber">Placeholder</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 2: Tools & Enhancement -->
+          <div>
+            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">2. Media Tools & Pro Studio</h3>
+            <div class="space-y-1">
+              <button onclick="loadScreen('screen-tools', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>6. Tools Workspace (SRS 7.8)</span>
+                <span class="text-[10px] font-mono text-primary-cyan">Tools</span>
+              </button>
+              <button onclick="loadScreen('screen-scaler', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>7. Pro Scaler Studio (A/B Slider)</span>
+                <span class="text-[10px] font-mono text-secondary-violet">NPU/CAS</span>
+              </button>
+              <button onclick="loadScreen('screen-directory-manager', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>8. Directory Indexing Manager</span>
+                <span class="text-[10px] font-mono text-text-secondary">Storage</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 3: Secret Vault (AES-256-GCM) -->
+          <div>
+            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">3. Secret Vault & Privacy</h3>
+            <div class="space-y-1">
+              <button onclick="loadScreen('screen-vault-auth', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>9. Vault Master PIN Gate</span>
+                <span class="text-[10px] font-mono text-secondary-violet">PIN: 1337</span>
+              </button>
+              <button onclick="loadScreen('screen-vault-browser', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>10. Vault Encrypted Browser</span>
+                <span class="text-[10px] font-mono text-secondary-violet">AES-256</span>
+              </button>
+              <button onclick="loadScreen('screen-vault-player', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>11. RAM-Only Vault Media Player</span>
+                <span class="text-[10px] font-mono text-secondary-violet">RAM Play</span>
+              </button>
+              <button onclick="loadScreen('screen-vault-tx', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>12. 6-Step Vault Move (VLT-02)</span>
+                <span class="text-[10px] font-mono text-secondary-violet">Atomic</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 4: Cloud, Expiry & Audit -->
+          <div>
+            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">4. Cloud, Expiry & Audit</h3>
+            <div class="space-y-1">
+              <button onclick="loadScreen('screen-drive-browser', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>13. Google Drive Cloud Browser</span>
+                <span class="text-[10px] font-mono text-primary-cyan">Drive</span>
+              </button>
+              <button onclick="loadScreen('screen-download-manager', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>14. 30-Day Expiry Supervisor</span>
+                <span class="text-[10px] font-mono text-warning-amber">EXP-06</span>
+              </button>
+              <button onclick="loadScreen('screen-backup-hub', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>15. Backup & Quota Hub (5GB)</span>
+                <span class="text-[10px] font-mono text-primary-cyan">Quota</span>
+              </button>
+              <button onclick="loadScreen('screen-audit-log', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>16. SHA-256 Immutable Audit</span>
+                <span class="text-[10px] font-mono text-signal-green">SHA-256</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 5: Governance & System -->
+          <div>
+            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">5. Governance & System</h3>
+            <div class="space-y-1">
+              <button onclick="loadScreen('screen-admin-login', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>17. Super Admin 2FA Gate</span>
+                <span class="text-[10px] font-mono text-thermal-red">TOTP: 999999</span>
+              </button>
+              <button onclick="loadScreen('screen-admin-dashboard', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>18. Admin Governance Hub</span>
+                <span class="text-[10px] font-mono text-thermal-red">Lockdown</span>
+              </button>
+              <button onclick="loadScreen('screen-settings', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>19. Settings & Decoder Order</span>
+                <span class="text-[10px] font-mono text-text-secondary">Decoders</span>
+              </button>
+              <button onclick="loadScreen('screen-dev-mode', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
+                <span>20. Dev Mode & Vulkan Shaders</span>
+                <span class="text-[10px] font-mono text-primary-cyan">Vulkan</span>
+              </button>
+              <button onclick="triggerMatrixModal(this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-primary-cyan bg-surface-carbon hover:bg-surface-carbon-raised text-primary-cyan flex items-center justify-between">
+                <span>21. 21-Screen Matrix Modal</span>
+                <span class="text-[10px] font-mono text-primary-cyan">Drawer</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flutter Codebase Architecture Card -->
+      <div class="bg-surface-carbon p-4 rounded border border-border-structural">
+        <h3 class="text-xs font-mono uppercase tracking-wider text-signal-green mb-2">Flutter Architecture Status</h3>
+        <ul class="text-xs space-y-1 text-text-secondary font-mono">
+          <li>✔ lib/core/theme (Cyber Precision)</li>
+          <li>✔ lib/core/widgets (Reusables)</li>
+          <li>✔ lib/features/video (Library & HUD)</li>
+          <li>✔ lib/features/audio (Player & EQ)</li>
+          <li>✔ lib/features/tools (Muxer/MP3)</li>
+          <li>✔ lib/features/pro (Scaler & Dev)</li>
+          <li>✔ lib/features/vault (AES-256-GCM)</li>
+          <li>✔ lib/features/cloud (Drive & DLD)</li>
+          <li>✔ lib/features/admin (Super Admin)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Center/Right: Device Simulator Testbed -->
+    <div class="flex-1 flex flex-col items-center justify-center">
+      <!-- Device Shell (412x915) -->
+      <div class="device-shell">
+        <iframe id="device-frame" class="screen-frame" src="index.html"></iframe>
+      </div>
+      <div class="mt-4 flex items-center gap-4 text-xs font-mono text-text-muted">
+        <span>OLED PITCH BLACK: #000000</span>
+        <span>•</span>
+        <span>ELECTRIC CYAN: #00F0FF</span>
+        <span>•</span>
+        <span>NEURAL VIOLET: #8B5CF6</span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function loadScreen(screenId, button) {
+      const frame = document.getElementById('device-frame');
+      if (frame && frame.contentWindow && typeof frame.contentWindow.switchScreen === 'function') {
+        frame.contentWindow.switchScreen(screenId);
+      } else if (frame) {
+        frame.src = 'index.html';
+        frame.onload = () => {
+          if (frame.contentWindow && typeof frame.contentWindow.switchScreen === 'function') {
+            frame.contentWindow.switchScreen(screenId);
+          }
+        };
+      }
+
+      document.querySelectorAll('.screen-btn').forEach(b => {
+        b.classList.remove('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
+        b.classList.add('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
+      });
+      if (button) {
+        button.classList.add('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
+        button.classList.remove('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
+      }
+    }
+
+    function triggerMatrixModal(button) {
+      const frame = document.getElementById('device-frame');
+      if (frame && frame.contentWindow && typeof frame.contentWindow.openModal === 'function') {
+        frame.contentWindow.openModal('matrix-modal');
+      }
+      document.querySelectorAll('.screen-btn').forEach(b => {
+        b.classList.remove('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
+        b.classList.add('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
+      });
+      if (button) {
+        button.classList.add('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
+        button.classList.remove('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
+      }
+    }
+  </script>
+</body>
+</html>

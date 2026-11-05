@@ -1,0 +1,88 @@
+Incorporating the core feature set of **PLAYit** (excluding its bloatware, ads, and slow downloaders) completes our system requirements. Below is the **Final Master Software Requirements Specification (SRS)**, combining your custom architecture, BinaHub's neural tools, and PLAYit's essential media utilities.
+
+---
+
+## Final Software Requirements Specification (SRS)
+
+### 1. System Architecture & Hardware Tiering
+
+* **Frontend & Backend:** Flutter (Dart) for the modular UI; C++ (via Dart FFI) utilizing Vulkan Compute and Qualcomm SNPE for bare-metal NPU/GPU execution.
+* **Low-End Protocol (<30k AnTuTu or <6GB RAM):** Boots strictly as a lightweight media player; heavy C++ AI and Vulkan libraries remain unmounted on disk and are dynamically injected into memory only if upscaling is explicitly triggered.
+* **High-End Protocol (Snapdragon 8s Gen 3 / Adreno 735+):** Enforces strict C++ memory arenas capped at an 8GB RAM ceiling to guarantee zero background termination by Android's Low Memory Killer (LMK).
+* **Decoder Switching (PLAYit Import):** Live toggle between Hardware Acceleration (HW+) and an advanced Software Kernel Decoder (SW) to guarantee playback across obscure or corrupted containers (MKV, FLV, TS, 3GP, MPG, M4V).
+
+### 2. UI Layout & Navigation
+
+* **Bottom Navigation Bar:** 4 persistent primary routes:
+* **Video:** Dedicated video library with dynamic resolution and format filters.
+* **Audio:** Dedicated music/audio player view with playlist and shuffle controls.
+* **Earn:** Renders a pure black screen with a centered `"Coming soon!"` text widget.
+* **Settings:** Global configuration, folder control, backup tools, and security gates.
+
+
+* **Theme Engine:** Instant switching between Dark Mode (OLED pitch black) and Light Mode.
+
+### 3. Media Indexing, Sorting & Security
+
+* **Selective Folder Indexing:** Whitelist/blacklist directory manager to fetch media only from user-approved folders and ignore system/junk directories, plus a toggle to scan or ignore hidden files.
+* **Quality-First Sorting:** Default sort prioritizes highest resolution and bitrate descending (4K → 1440p → 1080p → 720p).
+* **Secondary Sorting & Filtering:** Instant horizontal filter chips for resolution tags (All, 720p, 1080p, 4K) and sorting by Date (Newest/Oldest), File Size, Duration, and A-Z.
+
+
+* **Vault & Favorites:** One-tap Favorites tagging and an AES-256 encrypted **Secret Vault** (private folder) to hide sensitive videos/audio from both the main grid and the Android OS MediaStore.
+
+
+
+### 4. Playback & PLAYit Utility Imports
+
+* **Zero-Blur AI Upscaling Pipeline:** Dual-stage C++ rendering combining a real-time NPU super-resolution tensor pass with a hardcoded Contrast Adaptive Sharpening (CAS) pass and inverse de-blur kernel.
+
+
+* **Video-to-Audio Extraction:** One-tap **MP4-to-MP3 converter** and a "Play as Audio" toggle to listen to video tracks in the background with the screen off.
+* **Smart Muxer:** Instant, zero-recode merging of separate video and audio streams for low-end hardware efficiency.
+* **Multitasking & Continuity:** Resizable **Floating Picture-in-Picture (PiP)** window and **Smart Resume** (automatically continues playback from the exact millisecond last watched).
+
+
+* **Smart Gestures & Precision Controls:**
+* Vertical swipes for brightness/volume; horizontal swipes for seeking; pinch-to-zoom and aspect ratio fit toggles.
+
+
+* Single-frame step buttons (`1F-` / `1F+`), A-B repeat looping, and variable playback speed (0.25x to 4.0x).
+
+
+
+
+* **Subtitles & Audio:** Online subtitle search/download (multi-language), local `.srt`/`.ass` import, lyrics support for audio files, and an **Intelligent Sleep Timer**.
+
+### 5. Power Modes & Custom Profiles
+
+* **Power State Machine:**
+* **Eco:** Disables NPU tensors; uses standard hardware scaling + lightweight CAS to save battery.
+
+
+* **Normal:** Balanced 2K AI upscaling with active thermal throttling (soft limit ~45°C).
+* **Bypass:** Uncapped NPU/GPU overdrive for maximum zero-blur output, respecting a hard safety cutoff at **65°C** and battery threshold checks (**>30%**).
+
+
+* **Custom Video Profiles:** Users can tune settings on a test video in Development Mode, save the exact configuration as a named JSON profile in local SQLite storage, and apply it to any video on demand.
+
+### 6. Pro Features, Custom `mpv` & Scaler Manager
+
+* **Pro Features Gate:** Locked behind the encrypted passcode `"Zuniya"`. All Dart and C++ binaries will be compiled with string encryption and obfuscation to prevent modding.
+* **Hidden Development Settings:** Unlocked from Settings to expose raw NPU overdrive sliders, forced target resolutions, anti-aliasing suites, and custom power profiles.
+
+
+* **Configuration Portability:** Full Import/Export of app settings and custom profiles, alongside direct `mpv.conf` custom GPU shader script injection.
+* **Custom Scaler Import & Verification:**
+* Parses custom scaler files and validates authenticity by decoding the final line; rejects the file unless the decoded string strictly matches `"Zuniya"`.
+
+
+* **Imported Scalers Manager:**
+* Enforces active concurrent scaler limits by hardware tier: **Max 1** (Low-End), **Max 3** (High-End), **Max 5** (Sub-Flagship / Snapdragon 8s Gen 3+).
+* **Constraint Engine:** Parses `enabledoneonly;` to lock out all other scalers when active, and parses `allow = "[ScalerName]"` to enforce strict companion dependency rules before allowing a toggle to turn on.
+
+
+
+---
+
+Phase 1 (Requirements Gathering) is now locked. Ready to move into **Phase 2: System Design** and map out the **Flutter Modular Folder Structure & Widget Tree**?
