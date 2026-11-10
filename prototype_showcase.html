@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BinaHub Standard Video Player — Cyber Precision Interactive Design Showcase</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>Standard Video Player v1.0 — Interactive SRS Testbed & Showcase</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305080C' stroke='%2300E5FF' stroke-width='2'/%3E%3Cpolygon points='12,9 24,16 12,23' fill='%2300E5FF'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -15,288 +14,592 @@
       theme: {
         extend: {
           colors: {
-            'bg-pure-black': '#000000',
-            'surface-carbon': '#111115',
-            'surface-carbon-raised': '#16161C',
-            'border-structural': '#22222A',
-            'primary-cyan': '#00F0FF',
-            'secondary-violet': '#8B5CF6',
-            'signal-green': '#22C55E',
-            'thermal-red': '#EF4444',
-            'warning-amber': '#F59E0B',
-            'text-primary': '#FFFFFF',
-            'text-secondary': '#9CA3AF',
-            'text-muted': '#71717A',
+            'bg-black': '#05080C',
+            'carbon': '#12181F',
+            'carbon-raised': '#1A222B',
+            'border-dark': '#242F3D',
+            'cyan-glow': '#00E5FF',
+            'violet-glow': '#8B5CF6',
+            'amber-earn': '#FFB020',
+            'green-ok': '#22C55E',
+            'red-err': '#EF4444'
           },
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
+            mono: ['JetBrains Mono', 'monospace']
           }
         }
       }
     }
   </script>
   <style>
-    body { background-color: #07090D; color: #FFFFFF; font-family: 'Inter', sans-serif; }
+    :root, html[data-theme="cherry"] {
+      --sc-bg: #0A0407;
+      --sc-carbon: #140810;
+      --sc-carbon-raised: #1E0E18;
+      --sc-border: rgba(255, 255, 255, 0.10);
+      --sc-accent: #FF7597;
+      --sc-accent-glow: rgba(255, 117, 151, 0.35);
+      --sc-shell-shadow: 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 25px rgba(255, 117, 151, 0.15);
+    }
+    html[data-theme="cyber"] {
+      --sc-bg: #06080C;
+      --sc-carbon: #0E131C;
+      --sc-carbon-raised: #161D2B;
+      --sc-border: rgba(255, 255, 255, 0.10);
+      --sc-accent: #00E5FF;
+      --sc-accent-glow: rgba(0, 229, 255, 0.35);
+      --sc-shell-shadow: 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 25px rgba(0, 229, 255, 0.15);
+    }
+    html[data-theme="amoled"] {
+      --sc-bg: #000000;
+      --sc-carbon: #0D0D14;
+      --sc-carbon-raised: #171724;
+      --sc-border: rgba(255, 255, 255, 0.12);
+      --sc-accent: #00E5FF;
+      --sc-accent-glow: rgba(0, 229, 255, 0.35);
+      --sc-shell-shadow: 0 24px 60px rgba(0, 0, 0, 0.98);
+    }
+    html[data-theme="day"] {
+      --sc-bg: #F8FAFC;
+      --sc-carbon: #FFFFFF;
+      --sc-carbon-raised: #F1F5F9;
+      --sc-border: #CBD5E1;
+      --sc-accent: #E11D48;
+      --sc-accent-glow: rgba(225, 29, 72, 0.20);
+      --sc-shell-shadow: 0 10px 40px rgba(60, 20, 35, 0.10), 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* DAY THEME OUTLINE & CONTRAST FOR SHOWCASE */
+    html[data-theme="day"] body {
+      background-color: #EDF2F7 !important;
+      color: #0F172A !important;
+    }
+    html[data-theme="day"] header {
+      background-color: #FFFFFF !important;
+      border-color: #CBD5E1 !important;
+    }
+    html[data-theme="day"] h1,
+    html[data-theme="day"] h2,
+    html[data-theme="day"] .text-white {
+      color: #0F172A !important;
+    }
+    html[data-theme="day"] .text-gray-400 {
+      color: #475569 !important;
+    }
+    html[data-theme="day"] .text-gray-500 {
+      color: #64748B !important;
+    }
+    html[data-theme="day"] .bg-carbon {
+      background-color: #FFFFFF !important;
+      border-color: #CBD5E1 !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    }
+    html[data-theme="day"] .bg-carbon-raised {
+      background-color: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
+      color: #0F172A !important;
+    }
+    html[data-theme="day"] .border-border-dark {
+      border-color: #CBD5E1 !important;
+    }
+    html[data-theme="day"] .device-shell {
+      border-color: #CBD5E1 !important;
+      background: #FFFFFF !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    body {
+      background-color: var(--sc-bg);
+      color: #FFFFFF;
+      font-family: 'Inter', sans-serif;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 28px 28px;
+      transition: background-color 0.25s ease;
+    }
     .device-shell {
       width: 412px;
       height: 915px;
-      border: 3px solid #22222A;
+      border: 3px solid #1E232F;
       border-radius: 36px;
       overflow: hidden;
-      box-shadow: 0 0 30px rgba(0, 240, 255, 0.15), 0 20px 40px rgba(0,0,0,0.8);
+      box-shadow: var(--sc-shell-shadow);
+      background: #000000;
       position: relative;
-      background-color: #000000;
+      transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), height 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
     }
-    .screen-frame {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .device-shell.landscape-shell {
+      width: 915px !important;
+      height: 412px !important;
+      border-radius: 26px !important;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0B0E14; }
-    ::-webkit-scrollbar-thumb { background: #22222A; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
+    .nav-btn {
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover {
+      border-color: var(--sc-accent);
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+    .nav-btn.active {
+      border-color: var(--sc-accent);
+      background-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 12px var(--sc-accent-glow);
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--sc-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--sc-border); border-radius: 3px; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <!-- Top Navigation Bar -->
-  <header class="bg-surface-carbon border-b border-border-structural px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+
+  <!-- TOP SHOWCASE BAR -->
+  <header class="border-b border-border-dark bg-bg-black/95 backdrop-blur px-6 py-3 flex flex-wrap items-center justify-between sticky top-0 z-50 gap-3">
     <div class="flex items-center space-x-3">
-      <div class="w-8 h-8 rounded bg-primary-cyan text-black flex items-center justify-center font-bold font-mono text-sm shadow-[0_0_10px_rgba(0,240,255,0.4)]">
-        BH
+      <div class="w-9 h-9 rounded-lg bg-cyan-glow flex items-center justify-center text-black font-bold font-mono text-sm shadow-[0_0_15px_rgba(0,229,255,0.4)]">
+        SVP
       </div>
       <div>
-        <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
-          BinaHub <span class="text-xs px-2 py-0.5 rounded bg-primary-cyan/10 text-primary-cyan border border-primary-cyan/30 font-mono">v1.0 Cyber Precision</span>
-        </h1>
-        <p class="text-xs text-text-secondary">Standard Video Player — Interactive Mobile Frontend Showcase</p>
+        <div class="flex items-center space-x-2">
+          <h1 class="font-bold text-sm tracking-tight text-white">Standard Video Player</h1>
+          <span class="px-2 py-0.5 text-[10px] font-mono bg-cyan-glow/15 text-cyan-glow border border-cyan-glow/40 rounded">SRS v1.0 COMPLETE</span>
+        </div>
+        <p class="text-[11px] text-gray-400">Interactive Mobile Frontend Prototype — Single-Bezel Precision Testbed</p>
       </div>
     </div>
-    <div class="flex items-center gap-2 text-xs font-mono">
-      <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#16161C] border border-border-structural text-signal-green">
-        <span class="w-2 h-2 rounded-full bg-signal-green animate-pulse"></span>
-        FLUTTER FRONTEND READY
-      </span>
-      <span class="px-2.5 py-1 rounded bg-[#16161C] border border-border-structural text-text-secondary">
-        VIEWPORT: 412 × 915 px
-      </span>
+
+    <!-- Live Theme Atmosphere Selector -->
+    <div class="flex items-center space-x-2">
+      <span class="text-xs font-mono text-gray-400">Atmosphere:</span>
+      <div class="flex items-center bg-carbon border border-border-dark rounded-lg p-0.5 text-xs font-mono">
+        <button id="showcase-theme-cherry" onclick="setShowcaseTheme('cherry')" class="px-2.5 py-1.5 rounded-md flex items-center space-x-1 transition text-white bg-[#FF85A2]/25 border border-[#FF85A2]/50 font-bold" title="Cherry Blossom (桜花)">
+          <span>🌸</span>
+          <span>Cherry</span>
+        </button>
+        <button id="showcase-theme-cyber" onclick="setShowcaseTheme('cyber')" class="px-2.5 py-1.5 rounded-md text-gray-400 hover:text-white flex items-center space-x-1 transition" title="Arasaka Cyber (荒坂)">
+          <span>⚡</span>
+          <span>Cyber</span>
+        </button>
+        <button id="showcase-theme-amoled" onclick="setShowcaseTheme('amoled')" class="px-2.5 py-1.5 rounded-md text-gray-400 hover:text-white flex items-center space-x-1 transition" title="AMOLED Pitch Black">
+          <span>🌑</span>
+          <span>AMOLED</span>
+        </button>
+        <button id="showcase-theme-day" onclick="setShowcaseTheme('day')" class="px-2.5 py-1.5 rounded-md text-gray-400 hover:text-white flex items-center space-x-1 transition" title="Day Blossom (白桜)">
+          <span>☀️</span>
+          <span>Day</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Orientation Switcher & Direct Mode Links -->
+    <div class="flex items-center space-x-2.5">
+      <div class="flex items-center bg-carbon border border-border-dark rounded-lg p-0.5 text-xs font-mono">
+        <button id="btn-orient-portrait" onclick="setShowcaseOrientation('portrait')" class="px-3 py-1.5 rounded-md bg-cyan-glow text-black font-bold flex items-center space-x-1 transition">
+          <span class="material-symbols-outlined text-sm">stay_current_portrait</span>
+          <span>Portrait (412×915)</span>
+        </button>
+        <button id="btn-orient-landscape" onclick="setShowcaseOrientation('landscape')" class="px-3 py-1.5 rounded-md text-gray-400 hover:text-white flex items-center space-x-1 transition">
+          <span class="material-symbols-outlined text-sm">stay_current_landscape</span>
+          <span>Landscape (915×412)</span>
+        </button>
+      </div>
+
+      <a href="index.html" target="_blank" class="px-3 py-1.5 rounded-lg bg-carbon-raised border border-border-dark hover:border-cyan-glow text-xs font-mono text-cyan-glow flex items-center space-x-1.5 transition" title="Open standalone mobile shell in full browser tab">
+        <span class="material-symbols-outlined text-sm">open_in_new</span>
+        <span>Standalone View</span>
+      </a>
     </div>
   </header>
 
-  <!-- Main Showcase Container -->
-  <main class="flex-1 flex flex-col lg:flex-row p-6 gap-6 max-w-7xl mx-auto w-full">
-    <!-- Left: Screen Selection Gallery -->
-    <div class="w-full lg:w-80 flex flex-col gap-4">
-      <div class="bg-surface-carbon p-4 rounded border border-border-structural">
-        <h2 class="text-xs font-mono uppercase tracking-wider text-primary-cyan mb-2">Screen Directory (21 Views)</h2>
-        <p class="text-xs text-text-secondary mb-4">Click any module below to immediately render the high-fidelity UI in the mobile testbed.</p>
-        
-        <div class="space-y-4 max-h-[720px] overflow-y-auto pr-1">
-          <!-- Featured: Unified Interactive App -->
-          <div>
-            <h3 class="text-[11px] font-mono text-primary-cyan uppercase mb-1">★ Complete Mobile App</h3>
-            <button onclick="loadScreen('screen-video-library', this)" class="screen-btn w-full text-left px-3 py-2.5 text-xs rounded border border-primary-cyan bg-[#151C25] text-primary-cyan font-bold flex items-center justify-between shadow-[0_0_12px_rgba(0,240,255,0.2)]">
-              <span class="flex items-center space-x-2">
-                <span class="material-symbols-outlined text-sm">phone_android</span>
-                <span>Unified Interactive App (21 Screens)</span>
-              </span>
-              <span class="text-[10px] font-mono bg-primary-cyan text-black px-1.5 py-0.5 rounded font-bold">ACTIVE</span>
-            </button>
-          </div>
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 max-w-[1650px] w-full mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-          <!-- Group 1: Core Media & Playback -->
-          <div>
-            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">1. Core Media & Playback</h3>
-            <div class="space-y-1">
-              <button onclick="loadScreen('screen-video-library', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>1. Video Library Grid</span>
-                <span class="text-[10px] font-mono text-primary-cyan">Library</span>
-              </button>
-              <button onclick="loadScreen('screen-video-player', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>2. Video Player HUD (412x915)</span>
-                <span class="text-[10px] font-mono text-primary-cyan">HUD</span>
-              </button>
-              <button onclick="loadScreen('screen-audio-library', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>3. Audio Library & FLAC</span>
-                <span class="text-[10px] font-mono text-secondary-violet">Audio</span>
-              </button>
-              <button onclick="loadScreen('screen-audio-player', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>4. Audio Player & Lyrics</span>
-                <span class="text-[10px] font-mono text-secondary-violet">Vinyl</span>
-              </button>
-              <button onclick="loadScreen('screen-earn', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>5. Earn (Coming Soon - SRS 6.1)</span>
-                <span class="text-[10px] font-mono text-warning-amber">Placeholder</span>
-              </button>
-            </div>
-          </div>
+    <!-- LEFT SIDEBAR: SCREEN DIRECTORY & INTERACTIVE SCENARIO TRIGGERS (4 COLS) -->
+    <div class="lg:col-span-4 space-y-4 max-h-[86vh] overflow-y-auto pr-1">
 
-          <!-- Group 2: Tools & Enhancement -->
-          <div>
-            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">2. Media Tools & Pro Studio</h3>
-            <div class="space-y-1">
-              <button onclick="loadScreen('screen-tools', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>6. Tools Workspace (SRS 7.8)</span>
-                <span class="text-[10px] font-mono text-primary-cyan">Tools</span>
-              </button>
-              <button onclick="loadScreen('screen-scaler', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>7. Pro Scaler Studio (A/B Slider)</span>
-                <span class="text-[10px] font-mono text-secondary-violet">NPU/CAS</span>
-              </button>
-              <button onclick="loadScreen('screen-directory-manager', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>8. Directory Indexing Manager</span>
-                <span class="text-[10px] font-mono text-text-secondary">Storage</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Group 3: Secret Vault (AES-256-GCM) -->
-          <div>
-            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">3. Secret Vault & Privacy</h3>
-            <div class="space-y-1">
-              <button onclick="loadScreen('screen-vault-auth', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>9. Vault Master PIN Gate</span>
-                <span class="text-[10px] font-mono text-secondary-violet">PIN: 1337</span>
-              </button>
-              <button onclick="loadScreen('screen-vault-browser', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>10. Vault Encrypted Browser</span>
-                <span class="text-[10px] font-mono text-secondary-violet">AES-256</span>
-              </button>
-              <button onclick="loadScreen('screen-vault-player', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>11. RAM-Only Vault Media Player</span>
-                <span class="text-[10px] font-mono text-secondary-violet">RAM Play</span>
-              </button>
-              <button onclick="loadScreen('screen-vault-tx', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>12. 6-Step Vault Move (VLT-02)</span>
-                <span class="text-[10px] font-mono text-secondary-violet">Atomic</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Group 4: Cloud, Expiry & Audit -->
-          <div>
-            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">4. Cloud, Expiry & Audit</h3>
-            <div class="space-y-1">
-              <button onclick="loadScreen('screen-drive-browser', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>13. Google Drive Cloud Browser</span>
-                <span class="text-[10px] font-mono text-primary-cyan">Drive</span>
-              </button>
-              <button onclick="loadScreen('screen-download-manager', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>14. 30-Day Expiry Supervisor</span>
-                <span class="text-[10px] font-mono text-warning-amber">EXP-06</span>
-              </button>
-              <button onclick="loadScreen('screen-backup-hub', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>15. Backup & Quota Hub (5GB)</span>
-                <span class="text-[10px] font-mono text-primary-cyan">Quota</span>
-              </button>
-              <button onclick="loadScreen('screen-audit-log', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>16. SHA-256 Immutable Audit</span>
-                <span class="text-[10px] font-mono text-signal-green">SHA-256</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Group 5: Governance & System -->
-          <div>
-            <h3 class="text-[11px] font-mono text-text-muted uppercase mb-1">5. Governance & System</h3>
-            <div class="space-y-1">
-              <button onclick="loadScreen('screen-admin-login', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>17. Super Admin 2FA Gate</span>
-                <span class="text-[10px] font-mono text-thermal-red">TOTP: 999999</span>
-              </button>
-              <button onclick="loadScreen('screen-admin-dashboard', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>18. Admin Governance Hub</span>
-                <span class="text-[10px] font-mono text-thermal-red">Lockdown</span>
-              </button>
-              <button onclick="loadScreen('screen-settings', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>19. Settings & Decoder Order</span>
-                <span class="text-[10px] font-mono text-text-secondary">Decoders</span>
-              </button>
-              <button onclick="loadScreen('screen-dev-mode', this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-border-structural bg-surface-carbon hover:bg-surface-carbon-raised text-text-primary flex items-center justify-between">
-                <span>20. Dev Mode & Vulkan Shaders</span>
-                <span class="text-[10px] font-mono text-primary-cyan">Vulkan</span>
-              </button>
-              <button onclick="triggerMatrixModal(this)" class="screen-btn w-full text-left px-3 py-2 text-xs rounded border border-primary-cyan bg-surface-carbon hover:bg-surface-carbon-raised text-primary-cyan flex items-center justify-between">
-                <span>21. 21-Screen Matrix Modal</span>
-                <span class="text-[10px] font-mono text-primary-cyan">Drawer</span>
-              </button>
-            </div>
-          </div>
+      <!-- Interactive SRS Scenario Triggers -->
+      <div class="bg-carbon border border-border-dark rounded-xl p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-mono uppercase tracking-wider text-cyan-glow font-bold">Quick Interactive SRS Scenarios</h2>
+          <span class="text-[10px] font-mono text-green-ok">100% LIVE</span>
+        </div>
+        <p class="text-[11px] text-gray-400 mb-3">One-click triggers to test deep SRS v1.0 functional requirements directly inside the running viewport:</p>
+        <div class="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+          <button onclick="runScenario('hud-hidden')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-cyan-glow text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-cyan-glow">visibility_off</span>
+            <span class="truncate">Zero-Chrome HUD</span>
+          </button>
+          <button onclick="runScenario('eq-10band')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-cyan-glow text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-cyan-glow">equalizer</span>
+            <span class="truncate">10-Band ISO EQ</span>
+          </button>
+          <button onclick="runScenario('pip-window')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-cyan-glow text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-cyan-glow">picture_in_picture_alt</span>
+            <span class="truncate">Floating PiP (VID-18)</span>
+          </button>
+          <button onclick="runScenario('decoder-fallback')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-cyan-glow text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-green-ok">memory</span>
+            <span class="truncate">Decoder Fallback</span>
+          </button>
+          <button onclick="runScenario('subtitles-style')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-cyan-glow text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-cyan-glow">subtitles</span>
+            <span class="truncate">Subtitle Sync/Style</span>
+          </button>
+          <button onclick="runScenario('layout-custom')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-cyan-glow text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-cyan-glow">dashboard_customize</span>
+            <span class="truncate">Layout Customizer</span>
+          </button>
+          <button onclick="runScenario('audio-route')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-violet-glow text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-violet-glow">headphones</span>
+            <span class="truncate">Hi-Res Audio Route</span>
+          </button>
+          <button onclick="runScenario('clear-data-backup')" class="p-2 rounded bg-carbon-raised border border-border-dark hover:border-red-err text-left text-white flex items-center space-x-1.5">
+            <span class="material-symbols-outlined text-sm text-red-err">delete_forever</span>
+            <span class="truncate">Clear Data + Backup</span>
+          </button>
+          <button onclick="runScenario('import-gate')" class="p-2 rounded bg-carbon-raised border border-cyan-glow/50 hover:border-cyan-glow text-left text-white flex items-center space-x-1.5 col-span-2 shadow-[0_0_8px_rgba(0,229,255,0.2)]">
+            <span class="material-symbols-outlined text-sm text-cyan-glow">verified_user</span>
+            <span class="truncate font-bold">Layer Import Gate (2-4 vs 4+ Device Limits)</span>
+          </button>
         </div>
       </div>
 
-      <!-- Flutter Codebase Architecture Card -->
-      <div class="bg-surface-carbon p-4 rounded border border-border-structural">
-        <h3 class="text-xs font-mono uppercase tracking-wider text-signal-green mb-2">Flutter Architecture Status</h3>
-        <ul class="text-xs space-y-1 text-text-secondary font-mono">
-          <li>✔ lib/core/theme (Cyber Precision)</li>
-          <li>✔ lib/core/widgets (Reusables)</li>
-          <li>✔ lib/features/video (Library & HUD)</li>
-          <li>✔ lib/features/audio (Player & EQ)</li>
-          <li>✔ lib/features/tools (Muxer/MP3)</li>
-          <li>✔ lib/features/pro (Scaler & Dev)</li>
-          <li>✔ lib/features/vault (AES-256-GCM)</li>
-          <li>✔ lib/features/cloud (Drive & DLD)</li>
-          <li>✔ lib/features/admin (Super Admin)</li>
-        </ul>
+      <!-- 21-View Screen Directory -->
+      <div class="bg-carbon border border-border-dark rounded-xl p-4">
+        <h2 class="text-xs font-mono uppercase tracking-wider text-cyan-glow font-bold mb-1">Screen Directory (All SRS Views)</h2>
+        <p class="text-[11px] text-gray-400 mb-3">Jump directly to any screen or modal in the mobile prototype:</p>
+
+        <!-- Group 1: Core Media & Playback -->
+        <p class="text-[10px] font-mono text-gray-500 uppercase mb-1.5">1. Video, Audio & Core Playback</p>
+        <div class="space-y-1.5 mb-4">
+          <button onclick="navigateApp('screen-video-library', this)" class="nav-btn active w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">1. Video Library & Resume Card</span>
+            <span class="text-[10px] font-mono text-cyan-glow">VID-25 / UX-02</span>
+          </button>
+          <button onclick="navigateApp('screen-video-player', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">2. Video Player HUD (±10s / ±1F / Gestures)</span>
+            <span class="text-[10px] font-mono text-cyan-glow">VID-01..18</span>
+          </button>
+          <button onclick="navigateApp('screen-audio-library', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">3. Audio Library (Tracks/Artists/Albums/Folders)</span>
+            <span class="text-[10px] font-mono text-cyan-glow">AUD-01..05</span>
+          </button>
+          <button onclick="navigateApp('screen-audio-player', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">4. Full Audio Player (Rotating Vinyl & Synced LRC)</span>
+            <span class="text-[10px] font-mono text-cyan-glow">AUD-06..15</span>
+          </button>
+          <button onclick="navigateApp('screen-earn', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">5. Earn & Rewards Hub (Missions, Wallet & Store)</span>
+            <span class="text-[10px] font-mono text-amber-earn">SRS §6</span>
+          </button>
+        </div>
+
+        <!-- Group 2: Tools, Pro Mode & Indexing -->
+        <p class="text-[10px] font-mono text-gray-500 uppercase mb-1.5">2. Media Tools & Pro Studio (Free)</p>
+        <div class="space-y-1.5 mb-4">
+          <button onclick="navigateApp('screen-tools', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">6. Tools Workspace (4-Step Converter & Batch)</span>
+            <span class="text-[10px] font-mono text-cyan-glow">SRS §7.8</span>
+          </button>
+          <button onclick="navigateApp('screen-scaler', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">7. Pro Mode & Scaler Studio (Split & Side-by-Side)</span>
+            <span class="text-[10px] font-mono text-violet-glow">PRO-01..08</span>
+          </button>
+          <button onclick="navigateApp('screen-directory-manager', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">8. Directory Indexing Manager</span>
+            <span class="text-[10px] font-mono text-gray-400">LIB-02</span>
+          </button>
+        </div>
+
+        <!-- Group 3: Secret Vault -->
+        <p class="text-[10px] font-mono text-gray-500 uppercase mb-1.5">3. Secret Vault (Zero-Chrome Isolation)</p>
+        <div class="space-y-1.5 mb-4">
+          <button onclick="navigateApp('screen-vault-auth', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">9. Secret Vault PIN & Biometric Gate</span>
+            <span class="text-[10px] font-mono text-violet-glow">VLT-01</span>
+          </button>
+          <button onclick="navigateApp('screen-vault-browser', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">10. Encrypted Vault Browser</span>
+            <span class="text-[10px] font-mono text-violet-glow">AES-256</span>
+          </button>
+          <button onclick="navigateApp('screen-vault-player', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">11. Protected Vault Media Player</span>
+            <span class="text-[10px] font-mono text-violet-glow">VLT-05</span>
+          </button>
+          <button onclick="navigateApp('screen-vault-tx', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">12. 6-Step Atomic Vault Move Pipeline</span>
+            <span class="text-[10px] font-mono text-violet-glow">VLT-02</span>
+          </button>
+        </div>
+
+        <!-- Group 4: Cloud, Backup, Settings & Admin -->
+        <p class="text-[10px] font-mono text-gray-500 uppercase mb-1.5">4. Settings, Cloud, Backup & Governance</p>
+        <div class="space-y-1.5">
+          <button onclick="navigateApp('screen-settings', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">13. Settings (Decoders, Theme, Accessibility, Lock)</span>
+            <span class="text-[10px] font-mono text-cyan-glow">SRS §6.3</span>
+          </button>
+          <button onclick="navigateApp('screen-drive-browser', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">14. Google Drive Cloud Browser</span>
+            <span class="text-[10px] font-mono text-cyan-glow">DRV-01..10</span>
+          </button>
+          <button onclick="navigateApp('screen-download-manager', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">15. 30-Day Offline Expiry Supervisor</span>
+            <span class="text-[10px] font-mono text-cyan-glow">EXP-01..12</span>
+          </button>
+          <button onclick="navigateApp('screen-backup-hub', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">16. Backup Supervisor (5GB Quota & 70% Offload)</span>
+            <span class="text-[10px] font-mono text-cyan-glow">BKP-01..52</span>
+          </button>
+          <button onclick="navigateApp('screen-dev-mode', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">17. Development Mode (3-Device Slot Manager)</span>
+            <span class="text-[10px] font-mono text-violet-glow">DEV-01..14</span>
+          </button>
+          <button onclick="navigateApp('screen-admin-login', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">18. Super Admin 2FA Security Gate</span>
+            <span class="text-[10px] font-mono text-violet-glow">ADM-01</span>
+          </button>
+          <button onclick="navigateApp('screen-admin-dashboard', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">19. Super Admin Governance & Lockdown</span>
+            <span class="text-[10px] font-mono text-red-err">ADM-02..22</span>
+          </button>
+          <button onclick="navigateApp('screen-audit-log', this)" class="nav-btn w-full p-2.5 rounded-lg bg-carbon-raised border border-border-dark text-left flex items-center justify-between">
+            <span class="text-xs font-medium text-white">20. Immutable SHA-256 Audit Ledger</span>
+            <span class="text-[10px] font-mono text-green-ok">AUDIT-01..07</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Center/Right: Device Simulator Testbed -->
-    <div class="flex-1 flex flex-col items-center justify-center">
-      <!-- Device Shell (412x915) -->
-      <div class="device-shell">
-        <iframe id="device-frame" class="screen-frame" src="index.html"></iframe>
+    <!-- RIGHT WORKSPACE: LIVE MOBILE VIEWPORT (8 COLS) -->
+    <div class="lg:col-span-8 flex flex-col items-center justify-start">
+      <!-- Responsive Scale / Fit Controls (Guarantees zero-scroll fit on laptop screens) -->
+      <div class="mb-3 flex items-center space-x-2 bg-carbon border border-border-dark rounded-lg p-1 text-xs font-mono shadow-sm">
+        <span class="text-gray-400 text-[11px] px-2 flex items-center gap-1 font-semibold">
+          <span class="material-symbols-outlined text-sm">fit_screen</span> Scale:
+        </span>
+        <button id="btn-scale-auto" onclick="setScaleMode('auto')" class="px-2.5 py-1 rounded bg-cyan-glow text-black font-bold transition">Auto-Fit</button>
+        <button id="btn-scale-100" onclick="setScaleMode('100')" class="px-2 py-1 rounded text-gray-400 hover:text-white transition">100%</button>
+        <button id="btn-scale-85" onclick="setScaleMode('85')" class="px-2 py-1 rounded text-gray-400 hover:text-white transition">85%</button>
+        <button id="btn-scale-75" onclick="setScaleMode('75')" class="px-2 py-1 rounded text-gray-400 hover:text-white transition">75%</button>
       </div>
-      <div class="mt-4 flex items-center gap-4 text-xs font-mono text-text-muted">
-        <span>OLED PITCH BLACK: #000000</span>
-        <span>•</span>
-        <span>ELECTRIC CYAN: #00F0FF</span>
-        <span>•</span>
-        <span>NEURAL VIOLET: #8B5CF6</span>
+
+      <!-- Single-Bezel Device Frame with Scale Wrapper -->
+      <div id="device-stage-wrapper" class="relative flex items-start justify-center transition-all duration-200">
+        <div id="device-scale-container" class="origin-top transition-transform duration-200">
+          <div id="showcase-device-shell" class="device-shell">
+            <iframe id="app-iframe" src="index.html?embed=true" class="w-full h-full border-0"></iframe>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center justify-center gap-4 text-[11px] font-mono text-gray-400">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#05080C] border border-gray-600"></span>BG: #05080C</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#00E5FF]"></span>PRIMARY: #00E5FF</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]"></span>PRO/VAULT: #8B5CF6</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#FFB020]"></span>EARN ONLY: #FFB020</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#22C55E]"></span>STATUS: #22C55E</span>
       </div>
     </div>
-  </main>
+
+  </div>
 
   <script>
-    function loadScreen(screenId, button) {
-      const frame = document.getElementById('device-frame');
-      if (frame && frame.contentWindow && typeof frame.contentWindow.switchScreen === 'function') {
-        frame.contentWindow.switchScreen(screenId);
-      } else if (frame) {
-        frame.src = 'index.html';
-        frame.onload = () => {
-          if (frame.contentWindow && typeof frame.contentWindow.switchScreen === 'function') {
-            frame.contentWindow.switchScreen(screenId);
+    function getAppWindow() {
+      const iframe = document.getElementById('app-iframe');
+      return (iframe && iframe.contentWindow) ? iframe.contentWindow : null;
+    }
+
+    function navigateApp(screenId, btnElement) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      const win = getAppWindow();
+      if (!win) return;
+
+      if (screenId === 'screen-video-player' && typeof win.launchVideoPlayer === 'function') {
+        const topVideo = (win.videoPlaylist && win.videoPlaylist.length > 0) ? win.videoPlaylist[0] : null;
+        if (topVideo) {
+          win.launchVideoPlayer(topVideo.title, topVideo.totalTime, topVideo.res, topVideo.codec, topVideo.size);
+        } else {
+          win.launchVideoPlayer('Cyberpunk_Edgerunners_Ep10_Remastered_HDR.mkv', '02:14:05', '4K UHD', 'HEVC / 10-bit', '4.2 GB');
+        }
+        win.togglePlayerHUD(true);
+      } else if (screenId === 'screen-audio-player' && typeof win.openFullAudioPlayer === 'function') {
+        const topAudio = (win.videoPlaylist && win.videoPlaylist.length > 0) ? win.videoPlaylist[0] : null;
+        if (topAudio) {
+          win.openFullAudioPlayer(topAudio.title, 'Soundtrack & Media Audio', topAudio.codec, topAudio.totalTime, topAudio.url, topAudio.thumbUrl);
+        } else {
+          win.openFullAudioPlayer('Synthwave_Overdrive_2026.flac', 'Cyberpunk Soundscapes', 'FLAC 96kHz / 24-bit', '04:28');
+        }
+      } else if (typeof win.switchScreen === 'function') {
+        win.switchScreen(screenId);
+      }
+    }
+
+    let currentScaleMode = 'auto';
+    let isLandscape = false;
+
+    function applyScale() {
+      const container = document.getElementById('device-scale-container');
+      const stage = document.getElementById('device-stage-wrapper');
+      if (!container || !stage) return;
+
+      const shellWidth = isLandscape ? 915 : 412;
+      const shellHeight = isLandscape ? 412 : 915;
+
+      let scale = 1.0;
+      if (currentScaleMode === 'auto') {
+        // Measure viewport height: window.innerHeight - header (60px) - scale toolbar (45px) - outer padding (40px)
+        const availableHeight = Math.max(340, window.innerHeight - 150);
+        scale = Math.min(1.0, availableHeight / shellHeight);
+      } else if (currentScaleMode === '100') {
+        scale = 1.0;
+      } else if (currentScaleMode === '85') {
+        scale = 0.85;
+      } else if (currentScaleMode === '75') {
+        scale = 0.75;
+      }
+
+      container.style.transform = `scale(${scale})`;
+      stage.style.width = `${Math.round(shellWidth * scale)}px`;
+      stage.style.height = `${Math.round(shellHeight * scale)}px`;
+    }
+
+    function setScaleMode(mode) {
+      currentScaleMode = mode;
+      ['auto', '100', '85', '75'].forEach(m => {
+        const btn = document.getElementById(`btn-scale-${m}`);
+        if (btn) {
+          if (m === mode) {
+            btn.className = 'px-2.5 py-1 rounded bg-cyan-glow text-black font-bold transition';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded text-gray-400 hover:text-white transition';
           }
-        };
-      }
-
-      document.querySelectorAll('.screen-btn').forEach(b => {
-        b.classList.remove('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
-        b.classList.add('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
+        }
       });
-      if (button) {
-        button.classList.add('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
-        button.classList.remove('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
+      applyScale();
+    }
+
+    window.addEventListener('resize', applyScale);
+
+    function setShowcaseOrientation(mode) {
+      const shell = document.getElementById('showcase-device-shell');
+      const btnP = document.getElementById('btn-orient-portrait');
+      const btnL = document.getElementById('btn-orient-landscape');
+      const win = getAppWindow();
+
+      if (mode === 'landscape') {
+        isLandscape = true;
+        shell.classList.add('landscape-shell');
+        btnL.className = 'px-3 py-1.5 rounded-md bg-cyan-glow text-black font-bold flex items-center space-x-1 transition';
+        btnP.className = 'px-3 py-1.5 rounded-md text-gray-400 hover:text-white flex items-center space-x-1 transition';
+        if (win && typeof win.setOrientation === 'function') win.setOrientation('landscape');
+      } else {
+        isLandscape = false;
+        shell.classList.remove('landscape-shell');
+        btnP.className = 'px-3 py-1.5 rounded-md bg-cyan-glow text-black font-bold flex items-center space-x-1 transition';
+        btnL.className = 'px-3 py-1.5 rounded-md text-gray-400 hover:text-white flex items-center space-x-1 transition';
+        if (win && typeof win.setOrientation === 'function') win.setOrientation('portrait');
+      }
+      applyScale();
+    }
+
+    function runScenario(type) {
+      const win = getAppWindow();
+      if (!win) return;
+      win.closeModals();
+
+      const topVid = (win.videoPlaylist && win.videoPlaylist.length > 0) ? win.videoPlaylist[0] : null;
+      const playTitle = topVid ? topVid.title : 'Cyberpunk_Edgerunners_Ep10_Remastered_HDR.mkv';
+      const playTime = topVid ? topVid.totalTime : '02:14:05';
+      const playRes = topVid ? topVid.res : '4K UHD';
+      const playCodec = topVid ? topVid.codec : 'HEVC / 10-bit';
+      const playSize = topVid ? topVid.size : '4.2 GB';
+
+      if (type === 'hud-hidden') {
+        win.launchVideoPlayer(playTitle, playTime, playRes, playCodec, playSize);
+        win.togglePlayerHUD(false);
+      } else if (type === 'eq-10band') {
+        win.openFullAudioPlayer('Synthwave_Overdrive_2026.flac', 'Cyberpunk Soundscapes', 'FLAC 96kHz / 24-bit', '04:28');
+        win.openModal('eq-modal');
+      } else if (type === 'pip-window') {
+        win.activateFloatingPipPlayer();
+      } else if (type === 'decoder-fallback') {
+        win.launchVideoPlayer(playTitle, playTime, playRes, playCodec, playSize);
+        win.togglePlayerHUD(true);
+        win.simulateDecoderFallback();
+      } else if (type === 'subtitles-style') {
+        win.launchVideoPlayer(playTitle, playTime, playRes, playCodec, playSize);
+        win.togglePlayerHUD(true);
+        win.openModal('subtitle-modal');
+      } else if (type === 'layout-custom') {
+        win.switchScreen('screen-video-library');
+        win.openModal('layout-customizer-modal');
+      } else if (type === 'audio-route') {
+        win.switchScreen('screen-audio-library');
+        win.openModal('audio-route-modal');
+      } else if (type === 'clear-data-backup') {
+        win.switchScreen('screen-settings');
+        win.openModal('clear-data-modal');
+      } else if (type === 'import-gate') {
+        win.switchScreen('screen-video-library');
+        if (typeof win.openImportGateModal === 'function') {
+          win.openImportGateModal();
+        } else {
+          win.openModal('import-gate-modal');
+        }
       }
     }
 
-    function triggerMatrixModal(button) {
-      const frame = document.getElementById('device-frame');
-      if (frame && frame.contentWindow && typeof frame.contentWindow.openModal === 'function') {
-        frame.contentWindow.openModal('matrix-modal');
+    // Dynamic Theme Atmosphere Controls
+    function setShowcaseTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('cb_theme_mode', theme);
+      const win = getAppWindow();
+      if (win && typeof win.applyTheme === 'function') {
+        win.applyTheme(theme, false);
+      } else {
+        const iframe = document.getElementById('app-iframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'SET_THEME', theme: theme }, '*');
+        }
       }
-      document.querySelectorAll('.screen-btn').forEach(b => {
-        b.classList.remove('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
-        b.classList.add('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
-      });
-      if (button) {
-        button.classList.add('bg-[#151C25]', 'text-primary-cyan', 'font-medium', 'border-primary-cyan');
-        button.classList.remove('bg-surface-carbon', 'text-text-primary', 'border-border-structural');
-      }
+      updateThemeButtons(theme);
     }
+
+    function updateThemeButtons(theme) {
+      const themes = ['cherry', 'cyber', 'amoled', 'day'];
+      const styles = {
+        cherry: 'text-white bg-[#FF85A2]/25 border border-[#FF85A2]/50 font-bold',
+        cyber: 'text-white bg-[#75DDDD]/25 border border-[#75DDDD]/50 font-bold',
+        amoled: 'text-white bg-[#00E5FF]/25 border border-[#00E5FF]/50 font-bold',
+        day: 'text-white bg-[#E11D48]/25 border border-[#E11D48]/50 font-bold'
+      };
+      themes.forEach(t => {
+        const btn = document.getElementById(`showcase-theme-${t}`);
+        if (btn) {
+          if (t === theme) {
+            btn.className = `px-2.5 py-1.5 rounded-md flex items-center space-x-1 transition ${styles[t]}`;
+          } else {
+            btn.className = 'px-2.5 py-1.5 rounded-md text-gray-400 hover:text-white flex items-center space-x-1 transition';
+          }
+        }
+      });
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'THEME_CHANGED') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+        updateThemeButtons(e.data.theme);
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('cb_theme_mode') || 'cherry';
+      setShowcaseTheme(savedTheme);
+      applyScale();
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,27 @@
+# Build & Compilation
+.gradle/
+build/
+android/app/build/
+android/.gradle/
+
+# Python & Temporary Files
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+*.zip
+tmp_*.png
+tmp_*.jpg
+test_*.jpg
+
+# Large test assets & screenshots
+screenshots/
+visuals/
+thumbnails/
+*.pdf
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo

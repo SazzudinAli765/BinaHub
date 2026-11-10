@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.BinaHub" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#070A0E</item>
+        <item name="android:windowBackground">#05080C</item>
+        <item name="colorPrimary">#00F0FF</item>
+        <item name="colorSecondary">#BD00FF</item>
+    </style>
+</resources>

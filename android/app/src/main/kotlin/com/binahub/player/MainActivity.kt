@@ -1,164 +1,88 @@
 package com.binahub.player
 
-import android.content.Context
-import android.content.Intent
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
-import android.os.BatteryManager
+import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
-import androidx.annotation.NonNull
-import io.flutter.embedding.android.FlutterActivity
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugin.common.MethodChannel
+import android.webkit.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.webkit.WebViewAssetLoader
 
-class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.binahub.player/media_engine"
-    private var audioManager: AudioManager? = null
-    private var audioFocusRequest: AudioFocusRequest? = null
+class MainActivity : AppCompatActivity() {
 
-    companion object {
-        init {
-            try {
-                System.loadLibrary("bina_media_engine")
-            } catch (e: UnsatisfiedLinkError) {
-                // Graceful fallback for environments where NDK library is being built
-                e.printStackTrace()
+    private lateinit var webView: WebView
+
+    @SuppressLint("SetJavaScriptEnabled")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Keep screen on during media playback and dark theme status bar
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.statusBarColor = Color.BLACK
+        window.navigationBarColor = Color.parseColor("#070A0E")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.setSystemBarsAppearance(
+                0,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        }
+
+        val assetLoader = WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
+
+        webView = WebView(this).apply {
+            setBackgroundColor(Color.parseColor("#05080C"))
+
+            settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                mediaPlaybackRequiresUserGesture = false
+                allowFileAccess = true
+                allowContentAccess = true
+                databaseEnabled = true
+                setSupportZoom(false)
+                useWideViewPort = true
+                loadWithOverviewMode = true
+                cacheMode = WebSettings.LOAD_DEFAULT
+            }
+
+            webViewClient = object : WebViewClient() {
+                override fun shouldInterceptRequest(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): WebResourceResponse? {
+                    return request?.url?.let { assetLoader.shouldInterceptRequest(it) }
+                }
+            }
+
+            webChromeClient = object : WebChromeClient() {
+                override fun onPermissionRequest(request: PermissionRequest?) {
+                    request?.grant(request.resources)
+                }
+
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    return true
+                }
             }
         }
+
+        setContentView(webView)
+        // Load the Cyberpunk BinaHub App directly from assets
+        webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
     }
 
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
-        super.configureFlutterEngine(flutterEngine)
-
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            when (call.method) {
-                "setSecureWindowFlag" -> {
-                    val enable = call.argument<Boolean>("enable") ?: false
-                    setSecureFlag(enable)
-                    result.success(true)
-                }
-                "getThermalAndBatteryState", "getThermalAndBatteryTelemetry" -> {
-                    val status = getThermalAndBatteryTelemetry()
-                    result.success(status)
-                }
-                "requestAudioFocus" -> {
-                    val granted = requestAudioFocusInternal()
-                    result.success(granted)
-                }
-                "abandonAudioFocus" -> {
-                    abandonAudioFocusInternal()
-                    result.success(true)
-                }
-                "startForegroundMediaService" -> {
-                    val title = call.argument<String>("title") ?: "Media Playing"
-                    val artist = call.argument<String>("artist") ?: "BinaHub"
-                    startMediaService(title, artist)
-                    result.success(true)
-                }
-                "stopForegroundMediaService" -> {
-                    stopMediaService()
-                    result.success(true)
-                }
-                else -> result.notImplemented()
-            }
-        }
-    }
-
-    /**
-     * Prevents Android recents screenshot & screen recording (SRS VLT-07 & SEC-05)
-     */
-    private fun setSecureFlag(enable: Boolean) {
-        runOnUiThread {
-            if (enable) {
-                window.setFlags(
-                    WindowManager.LayoutParams.FLAG_SECURE,
-                    WindowManager.LayoutParams.FLAG_SECURE
-                )
-            } else {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-            }
-        }
-    }
-
-    /**
-     * Reads battery percentage, charging state, and thermal status (SRS ENH-09)
-     */
-    private fun getThermalAndBatteryTelemetry(): Map<String, Any> {
-        val bm = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-        val batteryPct = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-
-        var isThermalThrottled = false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-            val thermalStatus = pm.currentThermalStatus
-            isThermalThrottled = thermalStatus >= PowerManager.THERMAL_STATUS_SEVERE
-        }
-
-        return mapOf(
-            "batteryPct" to batteryPct,
-            "isThermalThrottled" to isThermalThrottled,
-            "isBatteryLow" to (batteryPct < 20)
-        )
-    }
-
-    private fun requestAudioFocusInternal(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val playbackAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
-                .build()
-
-            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(playbackAttributes)
-                .setAcceptsDelayedFocusGain(true)
-                .setOnAudioFocusChangeListener { focusChange ->
-                    // Propagated to player engine
-                }
-                .build()
-
-            return audioManager?.requestAudioFocus(audioFocusRequest!!) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+    override fun onBackPressed() {
+        if (this::webView.isInitialized && webView.canGoBack()) {
+            webView.goBack()
         } else {
-            @Suppress("DEPRECATION")
-            return audioManager?.requestAudioFocus(
-                null,
-                AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN
-            ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+            super.onBackPressed()
         }
-    }
-
-    private fun abandonAudioFocusInternal() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && audioFocusRequest != null) {
-            audioManager?.abandonAudioFocusRequest(audioFocusRequest!!)
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager?.abandonAudioFocus(null)
-        }
-    }
-
-    private fun startMediaService(title: String, artist: String) {
-        val intent = Intent(this, BinaMediaService::class.java).apply {
-            action = "ACTION_START_PLAYBACK"
-            putExtra("EXTRA_TITLE", title)
-            putExtra("EXTRA_ARTIST", artist)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
-    }
-
-    private fun stopMediaService() {
-        val intent = Intent(this, BinaMediaService::class.java).apply {
-            action = "ACTION_STOP_PLAYBACK"
-        }
-        startService(intent)
     }
 }
