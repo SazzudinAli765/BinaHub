@@ -1,8 +1,11 @@
 # Build & Compilation
 .gradle/
+.android/
+tools/
 build/
 android/app/build/
 android/.gradle/
+*.apk
 
 # Python & Temporary Files
 __pycache__/
