@@ -13,17 +13,31 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../sazzudinali.jks')
+            storePassword 'sazzudinali2026'
+            keyAlias 'sazzudinali'
+            keyPassword 'sazzudinali2026'
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             debuggable true
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {

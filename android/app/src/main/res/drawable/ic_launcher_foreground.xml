@@ -4,11 +4,58 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Glow Backdrop -->
+    <path
+        android:fillColor="#3300F0FF"
+        android:pathData="M54,34 C44,18 20,24 22,46 C24,62 46,68 54,80 C62,68 84,62 86,46 C88,24 64,18 54,34 Z" />
+    <!-- Upper Left Wing -->
+    <path
+        android:fillColor="#00E5FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M53,48 C44,28 22,30 24,52 C26,64 45,68 53,74 Z" />
+    <!-- Upper Right Wing -->
+    <path
+        android:fillColor="#00E5FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M55,48 C64,28 86,30 84,52 C82,64 63,68 55,74 Z" />
+    <!-- Lower Left Wing -->
+    <path
+        android:fillColor="#BD00FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M53,62 C42,65 30,76 34,88 C38,94 48,90 53,82 Z" />
+    <!-- Lower Right Wing -->
+    <path
+        android:fillColor="#BD00FF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M55,62 C66,65 78,76 74,88 C70,94 60,90 55,82 Z" />
+    <!-- Cyber Antennae -->
+    <path
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="1.5"
+        android:pathData="M52,44 C48,34 40,32 38,34" />
+    <path
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="1.5"
+        android:pathData="M56,44 C60,34 68,32 70,34" />
+    <!-- Antenna Nodes -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,34 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70,34 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+    <!-- Central Cybernetic Body -->
+    <path
+        android:fillColor="#0A0E17"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="1.5"
+        android:pathData="M52,43 C52,41 56,41 56,43 L57,60 L54,82 L51,60 Z" />
+    <!-- Core Reactor Dot -->
     <path
         android:fillColor="#00F0FF"
-        android:pathData="M38,30 L78,54 L38,78 Z" />
-    <path
-        android:strokeColor="#BD00FF"
-        android:strokeWidth="3"
-        android:pathData="M24,20 L84,20 L84,88 L24,88 Z" />
+        android:pathData="M54,54 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
 </vector>
