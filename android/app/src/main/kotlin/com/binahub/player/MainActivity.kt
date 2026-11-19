@@ -3,6 +3,7 @@ package com.binahub.player
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var webView: WebView
+    private lateinit var mediaBridge: BinaMediaBridge
     private var hasLoadedSuccessfully = false
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -40,7 +42,10 @@ class MainActivity : AppCompatActivity() {
             // 1. Safe window and edge-to-edge system bar styling
             setupSystemWindowBars()
 
-            // 2. Initialize Hardware-Accelerated WebView
+            // 2. Initialize Media & Storage Bridge
+            mediaBridge = BinaMediaBridge(this)
+
+            // 3. Initialize Hardware-Accelerated WebView
             webView = WebView(applicationContext).apply {
                 setBackgroundColor(Color.parseColor("#05080C"))
                 setLayerType(View.LAYER_TYPE_HARDWARE, null)
@@ -63,11 +68,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // 3. Register Security & Protection Interface for SazzudinAli
+                // Register Native Bridges for Web App
                 val securityGuard = BinaSecurityGuard(this@MainActivity)
                 addJavascriptInterface(securityGuard, "BinaSecurity")
+                addJavascriptInterface(mediaBridge, "BinaMediaBridge")
 
-                // 4. Dual Asset Loader with Fallback
+                // Dual Asset Loader with Fallback
                 val assetLoader = WebViewAssetLoader.Builder()
                     .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this@MainActivity))
                     .build()
@@ -77,6 +83,14 @@ class MainActivity : AppCompatActivity() {
                         view: WebView?,
                         request: WebResourceRequest?
                     ): WebResourceResponse? {
+                        val urlStr = request?.url?.toString() ?: ""
+                        // 1. Check if this is a local device media stream
+                        if (urlStr.contains("/local-media/")) {
+                            val stream = mediaBridge.openMediaStream(urlStr)
+                            if (stream != null) return stream
+                        }
+
+                        // 2. Handle assets
                         return try {
                             request?.url?.let { assetLoader.shouldInterceptRequest(it) }
                         } catch (e: Exception) {
@@ -90,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                         hasLoadedSuccessfully = true
                         Log.i(TAG, "Page loaded successfully: $url")
                         
-                        // Inject Security HUD Banner into DOM if ready
+                        // Inject Security HUD Banner into DOM
                         view?.evaluateJavascript("""
                             (function() {
                                 if (window.BinaSecurity && !document.getElementById('binahub-sec-pill')) {
@@ -127,7 +141,6 @@ class MainActivity : AppCompatActivity() {
                         failingUrl: String?
                     ) {
                         Log.w(TAG, "WebView error ($errorCode): $description for $failingUrl")
-                        // If domain loader fails, fallback to file:///android_asset/index.html
                         if (!hasLoadedSuccessfully && failingUrl == ASSET_DOMAIN_URL) {
                             Log.i(TAG, "Triggering fallback to $LOCAL_FILE_URL")
                             view?.loadUrl(LOCAL_FILE_URL)
@@ -158,6 +171,21 @@ class MainActivity : AppCompatActivity() {
         } catch (t: Throwable) {
             Log.e(TAG, "Fatal startup exception caught in onCreate", t)
             displayCrashFallbackUI(t)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == BinaMediaBridge.PERMISSION_REQUEST_CODE) {
+            val isGranted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+            Log.i(TAG, "Storage permission result: $isGranted")
+            if (this::webView.isInitialized) {
+                webView.evaluateJavascript("if (window.onStoragePermissionsResult) { window.onStoragePermissionsResult($isGranted); }", null)
+            }
         }
     }
 
