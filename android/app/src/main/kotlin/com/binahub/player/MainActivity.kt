@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -25,30 +26,34 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "BinaHubMain"
         private const val ASSET_DOMAIN_URL = "https://appassets.androidplatform.net/assets/index.html"
         private const val LOCAL_FILE_URL = "file:///android_asset/index.html"
+        private const val FILE_CHOOSER_REQUEST_CODE = 5050
     }
 
     private lateinit var webView: WebView
     private lateinit var mediaBridge: BinaMediaBridge
+    private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private var hasLoadedSuccessfully = false
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Safe global exception guard to prevent direct home screen crashes
         setupCrashGuard()
-
         super.onCreate(savedInstanceState)
 
         try {
-            // 1. Safe window and edge-to-edge system bar styling
+            // 1. Fullscreen Window & Edge-to-Edge setup (No fake status bar)
             setupSystemWindowBars()
 
             // 2. Initialize Media & Storage Bridge
             mediaBridge = BinaMediaBridge(this)
 
-            // 3. Initialize Hardware-Accelerated WebView
-            webView = WebView(applicationContext).apply {
+            // 3. Initialize Hardware-Accelerated Fullscreen WebView
+            webView = WebView(this).apply {
                 setBackgroundColor(Color.parseColor("#05080C"))
                 setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
 
                 settings.apply {
                     javaScriptEnabled = true
@@ -73,7 +78,6 @@ class MainActivity : AppCompatActivity() {
                 addJavascriptInterface(securityGuard, "BinaSecurity")
                 addJavascriptInterface(mediaBridge, "BinaMediaBridge")
 
-                // Dual Asset Loader with Fallback
                 val assetLoader = WebViewAssetLoader.Builder()
                     .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this@MainActivity))
                     .build()
@@ -84,13 +88,12 @@ class MainActivity : AppCompatActivity() {
                         request: WebResourceRequest?
                     ): WebResourceResponse? {
                         val urlStr = request?.url?.toString() ?: ""
-                        // 1. Check if this is a local device media stream
+                        // Handle streaming of real device videos and songs
                         if (urlStr.contains("/local-media/")) {
                             val stream = mediaBridge.openMediaStream(urlStr)
                             if (stream != null) return stream
                         }
 
-                        // 2. Handle assets
                         return try {
                             request?.url?.let { assetLoader.shouldInterceptRequest(it) }
                         } catch (e: Exception) {
@@ -104,34 +107,10 @@ class MainActivity : AppCompatActivity() {
                         hasLoadedSuccessfully = true
                         Log.i(TAG, "Page loaded successfully: $url")
                         
-                        // Inject Security HUD Banner into DOM
-                        view?.evaluateJavascript("""
-                            (function() {
-                                if (window.BinaSecurity && !document.getElementById('binahub-sec-pill')) {
-                                    try {
-                                        var pill = document.createElement('div');
-                                        pill.id = 'binahub-sec-pill';
-                                        pill.style.position = 'fixed';
-                                        pill.style.bottom = '8px';
-                                        pill.style.right = '8px';
-                                        pill.style.zIndex = '999999';
-                                        pill.style.background = 'rgba(7, 10, 14, 0.88)';
-                                        pill.style.border = '1px solid #00F0FF';
-                                        pill.style.color = '#00F0FF';
-                                        pill.style.fontSize = '9px';
-                                        pill.style.fontWeight = '700';
-                                        pill.style.fontFamily = 'monospace';
-                                        pill.style.padding = '3px 7px';
-                                        pill.style.borderRadius = '3px';
-                                        pill.style.letterSpacing = '0.5px';
-                                        pill.style.pointerEvents = 'none';
-                                        pill.style.boxShadow = '0 0 10px rgba(0, 240, 255, 0.3)';
-                                        pill.innerText = '🛡️ ' + window.BinaSecurity.getOwner().toUpperCase() + ' • ' + (window.BinaSecurity.isProtected() ? 'PROTECTED' : 'DEV');
-                                        document.body.appendChild(pill);
-                                    } catch(e) {}
-                                }
-                            })();
-                        """.trimIndent(), null)
+                        // Automatically check & trigger device storage scan if permissions are ready
+                        if (mediaBridge.hasStoragePermission()) {
+                            view?.evaluateJavascript("if (window.onStoragePermissionsGranted) { window.onStoragePermissionsGranted(); }", null)
+                        }
                     }
 
                     override fun onReceivedError(
@@ -157,6 +136,30 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
+                    // Native Android File Picker support for <input type="file">
+                    override fun onShowFileChooser(
+                        mWebView: WebView?,
+                        filePathCallback: ValueCallback<Array<Uri>>?,
+                        fileChooserParams: FileChooserParams?
+                    ): Boolean {
+                        fileChooserCallback?.onReceiveValue(null)
+                        fileChooserCallback = filePathCallback
+
+                        val intent = fileChooserParams?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+                            type = "*/*"
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                        }
+
+                        return try {
+                            startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
+                            true
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Cannot launch file chooser intent", e)
+                            fileChooserCallback = null
+                            false
+                        }
+                    }
+
                     override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                         Log.d("BinaHubConsole", "[JS ${consoleMessage?.messageLevel()}] ${consoleMessage?.message()} (${consoleMessage?.sourceId()}:${consoleMessage?.lineNumber()})")
                         return true
@@ -165,12 +168,25 @@ class MainActivity : AppCompatActivity() {
             }
 
             setContentView(webView)
-            // Primary URL load
             webView.loadUrl(ASSET_DOMAIN_URL)
+
+            // Auto-request storage permission on first launch so user sees the prompt immediately
+            if (!mediaBridge.hasStoragePermission()) {
+                mediaBridge.requestPermissions()
+            }
 
         } catch (t: Throwable) {
             Log.e(TAG, "Fatal startup exception caught in onCreate", t)
             displayCrashFallbackUI(t)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            val result = WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+            fileChooserCallback?.onReceiveValue(result)
+            fileChooserCallback = null
         }
     }
 
@@ -184,7 +200,11 @@ class MainActivity : AppCompatActivity() {
             val isGranted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
             Log.i(TAG, "Storage permission result: $isGranted")
             if (this::webView.isInitialized) {
-                webView.evaluateJavascript("if (window.onStoragePermissionsResult) { window.onStoragePermissionsResult($isGranted); }", null)
+                if (isGranted) {
+                    webView.evaluateJavascript("if (window.onStoragePermissionsGranted) { window.onStoragePermissionsGranted(); }", null)
+                } else {
+                    webView.evaluateJavascript("if (window.onStoragePermissionsDenied) { window.onStoragePermissionsDenied(); }", null)
+                }
             }
         }
     }
@@ -195,7 +215,7 @@ class MainActivity : AppCompatActivity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
             window.statusBarColor = Color.parseColor("#05080C")
-            window.navigationBarColor = Color.parseColor("#070A0E")
+            window.navigationBarColor = Color.parseColor("#05080C")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.setSystemBarsAppearance(
@@ -236,7 +256,6 @@ class MainActivity : AppCompatActivity() {
             setTextColor(Color.parseColor("#00F0FF"))
             textSize = 14f
             text = "=== BINAHUB RECOVERY HUD ===\n\n" +
-                   "Owner: SazzudinAli (Protection Active)\n" +
                    "Status: Fallback Activated\n\n" +
                    "Diagnostic Trace:\n${t.localizedMessage}\n\n" +
                    t.stackTrace.take(6).joinToString("\n") { "  at $it" } +
